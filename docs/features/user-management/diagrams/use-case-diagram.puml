@@ -1,0 +1,81 @@
+@startuml User Management Use Case Diagram
+
+skinparam actorStyle awesome
+skinparam usecase {
+    BackgroundColor White
+    BorderColor Black
+}
+
+left to right direction
+
+actor "Tenant Owner" as Owner
+actor "Tenant Admin" as Admin
+actor "Invited User" as Invitee
+actor "System" as System
+
+rectangle "User Management" {
+
+    usecase "Invite User" as UC1
+    usecase "Cancel Invitation" as UC2
+    usecase "Resend Invitation" as UC3
+    usecase "Accept Invitation" as UC4
+    usecase "View Team Members" as UC5
+    usecase "Change User Role" as UC6
+    usecase "Remove User" as UC7
+    usecase "Update Permissions" as UC8
+    usecase "Transfer Ownership" as UC9
+    usecase "View Pending Invitations" as UC10
+
+    usecase "Send Invitation Email" as UC_EMAIL
+    usecase "Validate Invitation Token" as UC_TOKEN
+    usecase "Create User Account" as UC_CREATE
+    usecase "Revoke User Sessions" as UC_SESSIONS
+}
+
+' Owner relationships
+Owner --> UC1
+Owner --> UC2
+Owner --> UC3
+Owner --> UC5
+Owner --> UC6
+Owner --> UC7
+Owner --> UC8
+Owner --> UC9
+Owner --> UC10
+
+' Admin relationships
+Admin --> UC1
+Admin --> UC2
+Admin --> UC3
+Admin --> UC5
+Admin --> UC6
+Admin --> UC7
+Admin --> UC10
+
+' Invitee relationships
+Invitee --> UC4
+
+' System relationships
+System --> UC_EMAIL
+System --> UC_TOKEN
+System --> UC_CREATE
+System --> UC_SESSIONS
+
+' Includes and extends
+UC1 ..> UC_EMAIL : <<include>>
+UC4 ..> UC_TOKEN : <<include>>
+UC4 ..> UC_CREATE : <<include>>
+UC7 ..> UC_SESSIONS : <<include>>
+
+note right of UC9
+    Only Owner can transfer.
+    New owner must be existing
+    tenant member.
+end note
+
+note right of UC7
+    Cannot remove last owner.
+    Sessions revoked immediately.
+end note
+
+@enduml

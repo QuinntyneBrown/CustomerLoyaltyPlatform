@@ -1,0 +1,81 @@
+@startuml Campaigns Use Case Diagram
+
+skinparam actorStyle awesome
+skinparam usecase {
+    BackgroundColor White
+    BorderColor Black
+}
+
+left to right direction
+
+actor "Business Owner" as Owner
+actor "Manager" as Manager
+actor "Member" as Member
+actor "System" as System
+
+rectangle "Campaigns & Promotions" {
+
+    usecase "Create Campaign" as UC1
+    usecase "View Campaign Dashboard" as UC2
+    usecase "Edit Campaign" as UC3
+    usecase "Cancel Campaign" as UC4
+    usecase "View Campaign Stats" as UC5
+    usecase "Generate Referral Code" as UC6
+    usecase "Share Referral Code" as UC7
+    usecase "Submit Referral" as UC8
+    usecase "View Referral History" as UC9
+    usecase "View Tier Status" as UC10
+    usecase "View Tier Progress" as UC11
+    usecase "Trigger Tier Evaluation" as UC12
+
+    usecase "Activate Scheduled Campaigns" as UC_ACT
+    usecase "End Expired Campaigns" as UC_END
+    usecase "Award Bonus Points" as UC_AWARD
+    usecase "Process Tier Changes" as UC_TIER
+    usecase "Convert Referral" as UC_CONV
+}
+
+' Owner relationships
+Owner --> UC1
+Owner --> UC2
+Owner --> UC3
+Owner --> UC4
+Owner --> UC5
+Owner --> UC12
+
+' Manager relationships
+Manager --> UC2
+Manager --> UC5
+Manager --> UC12
+
+' Member relationships
+Member --> UC6
+Member --> UC7
+Member --> UC9
+Member --> UC10
+Member --> UC11
+
+' System relationships
+System --> UC_ACT
+System --> UC_END
+System --> UC_AWARD
+System --> UC_TIER
+System --> UC_CONV
+
+' External actor
+actor "Referred Person" as Referee
+Referee --> UC8
+
+' Includes
+UC8 ..> UC_CONV : <<include>>
+UC_END ..> UC_AWARD : <<include>>
+UC12 ..> UC_TIER : <<include>>
+
+note right of UC12
+    Evaluates all members
+    against tier thresholds.
+    Processes promotions
+    and demotions.
+end note
+
+@enduml

@@ -1,0 +1,90 @@
+@startuml Report Generation Sequence
+
+skinparam sequenceArrowThickness 2
+skinparam sequenceParticipant underline
+
+title Report Generation Flow
+
+actor "Business Owner" as Owner
+participant "Report Builder" as UI
+participant "API Controller" as API
+participant "ReportService" as ReportSvc
+participant "AnalyticsService" as AnalyticsSvc
+participant "ReportGenerator" as Generator
+participant "Storage Service" as Storage
+participant "ICustomerLoyaltyPlatformContext" as DB
+participant "Event Publisher" as Events
+
+Owner -> UI: Open Report Builder
+activate UI
+
+Owner -> UI: Configure report\n(type, dates, sections)
+
+Owner -> UI: Click "Generate Report"
+UI -> API: POST /api/reports\n{reportConfig}
+activate API
+
+API -> ReportSvc: GenerateReport(command)
+activate ReportSvc
+
+ReportSvc -> ReportSvc: Create Report entity\n(status: Processing)
+
+ReportSvc -> DB: Save Report
+activate DB
+DB --> ReportSvc: Saved
+deactivate DB
+
+ReportSvc --> API: Report queued\n{reportId}
+deactivate ReportSvc
+
+API --> UI: 202 Accepted\n{reportId}
+deactivate API
+
+UI --> Owner: "Report generating...\nYou'll be notified when ready"
+
+note right of UI
+    Report processing
+    happens asynchronously
+end note
+
+ReportSvc -> AnalyticsSvc: GetAnalyticsData(period)
+activate AnalyticsSvc
+
+AnalyticsSvc -> DB: Query member data
+AnalyticsSvc -> DB: Query transaction data
+AnalyticsSvc -> DB: Query reward data
+AnalyticsSvc --> ReportSvc: AnalyticsData
+deactivate AnalyticsSvc
+
+ReportSvc -> Generator: GeneratePDF(data, template)
+activate Generator
+Generator -> Generator: Render sections
+Generator -> Generator: Create charts
+Generator -> Generator: Format document
+Generator --> ReportSvc: PDF bytes
+deactivate Generator
+
+ReportSvc -> Storage: UploadReport(reportId, pdf)
+activate Storage
+Storage --> ReportSvc: fileUrl
+deactivate Storage
+
+ReportSvc -> DB: Update Report\n(status: Completed, fileUrl)
+activate DB
+DB --> ReportSvc: Updated
+deactivate DB
+
+ReportSvc -> Events: Publish(ReportGenerated)
+activate Events
+Events --> ReportSvc: Published
+deactivate Events
+
+Events -> UI: WebSocket notification\n"Report ready"
+UI --> Owner: "Your report is ready!\n[Download]"
+
+Owner -> UI: Click Download
+UI -> API: GET /api/reports/{id}/download
+API --> UI: PDF file stream
+UI --> Owner: Report downloaded
+
+@enduml

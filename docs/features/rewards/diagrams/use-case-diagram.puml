@@ -1,0 +1,77 @@
+@startuml Rewards Management Use Case Diagram
+
+skinparam actorStyle awesome
+skinparam usecase {
+    BackgroundColor White
+    BorderColor Black
+}
+
+left to right direction
+
+actor "Business Owner" as Owner
+actor "Staff" as Staff
+actor "Member" as Member
+actor "System" as System
+
+rectangle "Rewards Management" {
+
+    usecase "Create Reward" as UC1
+    usecase "Update Reward" as UC2
+    usecase "Retire Reward" as UC3
+    usecase "Restock Inventory" as UC4
+    usecase "View Reward Catalog" as UC5
+    usecase "Browse Available Rewards" as UC6
+    usecase "Redeem Reward" as UC7
+    usecase "View Redemption History" as UC8
+    usecase "Validate Redemption Code" as UC9
+    usecase "Mark Redemption Used" as UC10
+    usecase "View Redemption Voucher" as UC11
+
+    usecase "Generate Redemption Code" as UC_CODE
+    usecase "Deduct Points" as UC_DEDUCT
+    usecase "Update Inventory" as UC_INV
+    usecase "Check Low Inventory" as UC_LOW
+}
+
+' Owner relationships
+Owner --> UC1
+Owner --> UC2
+Owner --> UC3
+Owner --> UC4
+Owner --> UC5
+
+' Staff relationships
+Staff --> UC5
+Staff --> UC7
+Staff --> UC9
+Staff --> UC10
+
+' Member relationships
+Member --> UC6
+Member --> UC7
+Member --> UC8
+Member --> UC11
+
+' System relationships
+System --> UC_CODE
+System --> UC_DEDUCT
+System --> UC_INV
+System --> UC_LOW
+
+' Includes
+UC7 ..> UC_CODE : <<include>>
+UC7 ..> UC_DEDUCT : <<include>>
+UC7 ..> UC_INV : <<include>>
+
+note right of UC7
+    Validates points balance.
+    Validates inventory.
+    Generates unique code.
+end note
+
+note right of UC4
+    Publishes RewardRestocked
+    event when inventory added.
+end note
+
+@enduml

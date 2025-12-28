@@ -1,0 +1,119 @@
+@startuml Business Management Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor White
+    ArrowColor Black
+    BorderColor Black
+}
+
+package "Business Management Domain" {
+
+    enum BusinessType {
+        Automotive
+        Retail
+        Services
+        FoodAndBeverage
+        Healthcare
+        Entertainment
+        Other
+    }
+
+    enum BusinessStatus {
+        Pending
+        Active
+        Suspended
+        Closed
+    }
+
+    enum VerificationType {
+        Email
+        Phone
+        Identity
+        Document
+    }
+
+    class Business {
+        +BusinessId: Guid
+        +TenantId: Guid
+        +BusinessName: string
+        +OwnerName: string
+        +Email: string
+        +Phone: string
+        +BusinessType: BusinessType
+        +Address: Address
+        +Status: BusinessStatus
+        +LogoUrl: string?
+        +IsEmailVerified: bool
+        +IsPhoneVerified: bool
+        +IsIdentityVerified: bool
+        +RegisteredAt: DateTime
+        +CreatedAt: DateTime
+        +UpdatedAt: DateTime
+        --
+        +UpdateProfile(fields: Dictionary): void
+        +Verify(type: VerificationType): void
+        +Suspend(reason: string, suspendedBy: Guid): void
+        +Reactivate(reactivatedBy: Guid): void
+        +Close(reason: string, pointsHandling: string): void
+    }
+
+    class Address <<ValueObject>> {
+        +Street: string
+        +City: string
+        +State: string
+        +PostalCode: string
+        +Country: string
+    }
+
+    class BusinessVerification {
+        +VerificationId: Guid
+        +BusinessId: Guid
+        +Type: VerificationType
+        +CodeHash: string
+        +ExpiresAt: DateTime
+        +VerifiedAt: DateTime?
+        +Status: string
+        --
+        +Confirm(code: string): bool
+        +IsExpired(): bool
+    }
+
+    Business *-- Address
+    Business "1" *-- "many" BusinessVerification
+}
+
+package "Business Management Services" {
+
+    interface IBusinessService {
+        +RegisterBusiness(command: RegisterBusinessCommand): Task<Business>
+        +UpdateProfile(businessId: Guid, fields: Dictionary): Task
+        +GetBusiness(businessId: Guid): Task<Business>
+        +SuspendBusiness(businessId: Guid, reason: string): Task
+        +ReactivateBusiness(businessId: Guid): Task
+        +CloseBusiness(businessId: Guid, reason: string): Task
+    }
+
+    interface IBusinessVerificationService {
+        +InitiateVerification(businessId: Guid, type: VerificationType): Task
+        +ConfirmVerification(businessId: Guid, type: VerificationType, code: string): Task<bool>
+        +GetVerificationStatus(businessId: Guid): Task<List<BusinessVerification>>
+    }
+
+    class BusinessService {
+        -_context: ICustomerLoyaltyPlatformContext
+        -_eventPublisher: IEventPublisher
+    }
+
+    class BusinessVerificationService {
+        -_context: ICustomerLoyaltyPlatformContext
+        -_eventPublisher: IEventPublisher
+        -_emailService: IEmailService
+        -_smsService: ISmsService
+    }
+
+    BusinessService ..|> IBusinessService
+    BusinessVerificationService ..|> IBusinessVerificationService
+}
+
+@enduml

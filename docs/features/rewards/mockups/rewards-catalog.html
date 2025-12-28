@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rewards Catalog - Customer Loyalty Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; background-color: #fafafa; color: #333; }
+        .app-container { display: flex; min-height: 100vh; }
+        .sidebar { width: 240px; background-color: #3f51b5; color: white; padding: 16px 0; }
+        .sidebar-header { padding: 16px 24px; font-size: 20px; font-weight: 500; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 8px; }
+        .nav-item { display: flex; align-items: center; padding: 12px 24px; cursor: pointer; transition: background-color 0.2s; }
+        .nav-item:hover { background-color: rgba(255,255,255,0.1); }
+        .nav-item.active { background-color: rgba(255,255,255,0.2); }
+        .nav-item .material-icons { margin-right: 16px; }
+        .main-content { flex: 1; padding: 24px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .page-title { font-size: 24px; font-weight: 400; }
+        .btn-primary { display: flex; align-items: center; gap: 8px; padding: 10px 20px; background: #3f51b5; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; }
+        .toolbar { display: flex; gap: 16px; margin-bottom: 24px; }
+        .filter-select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; background: white; }
+        .rewards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .reward-card { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
+        .reward-card:hover { transform: translateY(-4px); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+        .reward-image { height: 160px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; }
+        .reward-image .material-icons { font-size: 64px; color: rgba(255,255,255,0.8); }
+        .reward-content { padding: 20px; }
+        .reward-name { font-size: 18px; font-weight: 500; margin-bottom: 8px; }
+        .reward-description { color: #666; font-size: 14px; margin-bottom: 16px; line-height: 1.5; }
+        .reward-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .reward-points { display: flex; align-items: center; gap: 4px; font-weight: 500; color: #3f51b5; font-size: 18px; }
+        .reward-value { color: #666; font-size: 14px; }
+        .reward-stock { display: flex; align-items: center; gap: 4px; font-size: 12px; }
+        .stock-available { color: #4caf50; }
+        .stock-low { color: #ff9800; }
+        .stock-out { color: #f44336; }
+        .reward-stats { display: flex; gap: 16px; padding-top: 16px; border-top: 1px solid #eee; font-size: 12px; color: #666; }
+        .reward-actions { display: flex; gap: 8px; margin-top: 16px; }
+        .btn-edit { flex: 1; padding: 10px; border: 1px solid #3f51b5; background: white; color: #3f51b5; border-radius: 4px; cursor: pointer; font-weight: 500; }
+        .btn-retire { padding: 10px; border: 1px solid #ddd; background: white; color: #666; border-radius: 4px; cursor: pointer; }
+        .summary-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .summary-card { background: white; padding: 16px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .summary-label { font-size: 12px; color: #666; margin-bottom: 4px; }
+        .summary-value { font-size: 24px; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">Mike's Auto Rewards</div>
+            <div class="nav-item"><span class="material-icons">dashboard</span>Dashboard</div>
+            <div class="nav-item"><span class="material-icons">people</span>Members</div>
+            <div class="nav-item"><span class="material-icons">stars</span>Points</div>
+            <div class="nav-item active"><span class="material-icons">card_giftcard</span>Rewards</div>
+            <div class="nav-item"><span class="material-icons">campaign</span>Campaigns</div>
+            <div class="nav-item"><span class="material-icons">analytics</span>Analytics</div>
+            <div class="nav-item"><span class="material-icons">settings</span>Settings</div>
+        </nav>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Rewards Catalog</h1>
+                <button class="btn-primary">
+                    <span class="material-icons">add</span>
+                    Add Reward
+                </button>
+            </div>
+
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="summary-label">Total Rewards</div>
+                    <div class="summary-value">12</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Total Redemptions</div>
+                    <div class="summary-value">450</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Points Liability</div>
+                    <div class="summary-value">125K</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Low Stock Items</div>
+                    <div class="summary-value" style="color: #ff9800;">2</div>
+                </div>
+            </div>
+
+            <div class="toolbar">
+                <select class="filter-select">
+                    <option>All Types</option>
+                    <option>Discounts</option>
+                    <option>Free Items</option>
+                    <option>Services</option>
+                </select>
+                <select class="filter-select">
+                    <option>All Status</option>
+                    <option>Active</option>
+                    <option>Low Stock</option>
+                    <option>Out of Stock</option>
+                </select>
+            </div>
+
+            <div class="rewards-grid">
+                <div class="reward-card">
+                    <div class="reward-image" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                        <span class="material-icons">local_car_wash</span>
+                    </div>
+                    <div class="reward-content">
+                        <div class="reward-name">Free Car Wash</div>
+                        <div class="reward-description">Complete exterior and interior car wash service</div>
+                        <div class="reward-meta">
+                            <div class="reward-points">
+                                <span class="material-icons" style="font-size: 18px;">stars</span>
+                                100 Miles
+                            </div>
+                            <div class="reward-value">$15 value</div>
+                        </div>
+                        <div class="reward-stock">
+                            <span class="material-icons" style="font-size: 16px; color: #4caf50;">check_circle</span>
+                            <span class="stock-available">Unlimited</span>
+                        </div>
+                        <div class="reward-stats">
+                            <span>98 redemptions</span>
+                            <span>•</span>
+                            <span>Most Popular</span>
+                        </div>
+                        <div class="reward-actions">
+                            <button class="btn-edit">Edit</button>
+                            <button class="btn-retire"><span class="material-icons" style="font-size: 18px;">more_vert</span></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reward-card">
+                    <div class="reward-image" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <span class="material-icons">build</span>
+                    </div>
+                    <div class="reward-content">
+                        <div class="reward-name">Free Oil Change</div>
+                        <div class="reward-description">Standard oil change with filter replacement</div>
+                        <div class="reward-meta">
+                            <div class="reward-points">
+                                <span class="material-icons" style="font-size: 18px;">stars</span>
+                                500 Miles
+                            </div>
+                            <div class="reward-value">$45 value</div>
+                        </div>
+                        <div class="reward-stock">
+                            <span class="material-icons" style="font-size: 16px; color: #4caf50;">check_circle</span>
+                            <span class="stock-available">In Stock</span>
+                        </div>
+                        <div class="reward-stats">
+                            <span>156 redemptions</span>
+                            <span>•</span>
+                            <span>Top Tier Reward</span>
+                        </div>
+                        <div class="reward-actions">
+                            <button class="btn-edit">Edit</button>
+                            <button class="btn-retire"><span class="material-icons" style="font-size: 18px;">more_vert</span></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reward-card">
+                    <div class="reward-image" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <span class="material-icons">sell</span>
+                    </div>
+                    <div class="reward-content">
+                        <div class="reward-name">$10 Off Service</div>
+                        <div class="reward-description">$10 discount on any service over $50</div>
+                        <div class="reward-meta">
+                            <div class="reward-points">
+                                <span class="material-icons" style="font-size: 18px;">stars</span>
+                                200 Miles
+                            </div>
+                            <div class="reward-value">$10 value</div>
+                        </div>
+                        <div class="reward-stock">
+                            <span class="material-icons" style="font-size: 16px; color: #ff9800;">warning</span>
+                            <span class="stock-low">Low: 5 left</span>
+                        </div>
+                        <div class="reward-stats">
+                            <span>124 redemptions</span>
+                        </div>
+                        <div class="reward-actions">
+                            <button class="btn-edit">Edit</button>
+                            <button class="btn-retire"><span class="material-icons" style="font-size: 18px;">more_vert</span></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reward-card">
+                    <div class="reward-image" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <span class="material-icons">tire_repair</span>
+                    </div>
+                    <div class="reward-content">
+                        <div class="reward-name">Free Tire Rotation</div>
+                        <div class="reward-description">Complete tire rotation and pressure check</div>
+                        <div class="reward-meta">
+                            <div class="reward-points">
+                                <span class="material-icons" style="font-size: 18px;">stars</span>
+                                300 Miles
+                            </div>
+                            <div class="reward-value">$25 value</div>
+                        </div>
+                        <div class="reward-stock">
+                            <span class="material-icons" style="font-size: 16px; color: #4caf50;">check_circle</span>
+                            <span class="stock-available">Unlimited</span>
+                        </div>
+                        <div class="reward-stats">
+                            <span>45 redemptions</span>
+                        </div>
+                        <div class="reward-actions">
+                            <button class="btn-edit">Edit</button>
+                            <button class="btn-retire"><span class="material-icons" style="font-size: 18px;">more_vert</span></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reward-card">
+                    <div class="reward-image" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                        <span class="material-icons">local_offer</span>
+                    </div>
+                    <div class="reward-content">
+                        <div class="reward-name">$25 Off Parts</div>
+                        <div class="reward-description">$25 discount on parts purchase over $100</div>
+                        <div class="reward-meta">
+                            <div class="reward-points">
+                                <span class="material-icons" style="font-size: 18px;">stars</span>
+                                400 Miles
+                            </div>
+                            <div class="reward-value">$25 value</div>
+                        </div>
+                        <div class="reward-stock">
+                            <span class="material-icons" style="font-size: 16px; color: #4caf50;">check_circle</span>
+                            <span class="stock-available">In Stock: 20</span>
+                        </div>
+                        <div class="reward-stats">
+                            <span>72 redemptions</span>
+                        </div>
+                        <div class="reward-actions">
+                            <button class="btn-edit">Edit</button>
+                            <button class="btn-retire"><span class="material-icons" style="font-size: 18px;">more_vert</span></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reward-card">
+                    <div class="reward-image" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                        <span class="material-icons">check</span>
+                    </div>
+                    <div class="reward-content">
+                        <div class="reward-name">Free Inspection</div>
+                        <div class="reward-description">Complete 27-point vehicle inspection</div>
+                        <div class="reward-meta">
+                            <div class="reward-points">
+                                <span class="material-icons" style="font-size: 18px;">stars</span>
+                                150 Miles
+                            </div>
+                            <div class="reward-value">$20 value</div>
+                        </div>
+                        <div class="reward-stock">
+                            <span class="material-icons" style="font-size: 16px; color: #4caf50;">check_circle</span>
+                            <span class="stock-available">Unlimited</span>
+                        </div>
+                        <div class="reward-stats">
+                            <span>35 redemptions</span>
+                        </div>
+                        <div class="reward-actions">
+                            <button class="btn-edit">Edit</button>
+                            <button class="btn-retire"><span class="material-icons" style="font-size: 18px;">more_vert</span></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

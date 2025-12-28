@@ -1,0 +1,69 @@
+@startuml Business Management Use Case Diagram
+
+skinparam actorStyle awesome
+skinparam usecase {
+    BackgroundColor White
+    BorderColor Black
+}
+
+left to right direction
+
+actor "Business Owner" as Owner
+actor "Platform Admin" as Admin
+actor "System" as System
+
+rectangle "Business Management" {
+
+    usecase "Register Business" as UC1
+    usecase "Update Business Profile" as UC2
+    usecase "Upload Business Logo" as UC3
+    usecase "Initiate Email Verification" as UC4
+    usecase "Initiate Phone Verification" as UC5
+    usecase "Initiate Identity Verification" as UC6
+    usecase "Confirm Verification Code" as UC7
+    usecase "View Business Dashboard" as UC8
+    usecase "Suspend Business" as UC9
+    usecase "Reactivate Business" as UC10
+    usecase "Close Business" as UC11
+
+    usecase "Send Verification Code" as UC_SEND
+    usecase "Validate Verification Code" as UC_VALIDATE
+    usecase "Notify Members of Closure" as UC_NOTIFY
+    usecase "Archive Business Data" as UC_ARCHIVE
+}
+
+' Owner relationships
+Owner --> UC1
+Owner --> UC2
+Owner --> UC3
+Owner --> UC4
+Owner --> UC5
+Owner --> UC6
+Owner --> UC7
+Owner --> UC8
+Owner --> UC11
+
+' Admin relationships
+Admin --> UC9
+Admin --> UC10
+
+' System relationships
+System --> UC_SEND
+System --> UC_VALIDATE
+System --> UC_NOTIFY
+System --> UC_ARCHIVE
+
+' Includes
+UC4 ..> UC_SEND : <<include>>
+UC5 ..> UC_SEND : <<include>>
+UC7 ..> UC_VALIDATE : <<include>>
+UC11 ..> UC_NOTIFY : <<include>>
+UC11 ..> UC_ARCHIVE : <<include>>
+
+note right of UC11
+    Requires confirmation.
+    Handles outstanding points.
+    Notifies all members.
+end note
+
+@enduml

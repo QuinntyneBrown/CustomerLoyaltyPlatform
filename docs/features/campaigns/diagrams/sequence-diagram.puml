@@ -1,0 +1,82 @@
+@startuml Referral Conversion Sequence
+
+skinparam sequenceArrowThickness 2
+skinparam sequenceParticipant underline
+
+title Referral Conversion Flow
+
+actor "New Customer" as NewCustomer
+actor "Staff" as Staff
+participant "Enrollment Form" as UI
+participant "API Controller" as API
+participant "MemberService" as MemberSvc
+participant "ReferralService" as ReferralSvc
+participant "PointsService" as PointsSvc
+participant "ICustomerLoyaltyPlatformContext" as DB
+participant "Event Publisher" as Events
+
+NewCustomer -> Staff: Wants to join with\nreferral code
+Staff -> UI: Open enrollment form
+activate UI
+
+Staff -> UI: Enter referral code\nand customer details
+
+UI -> API: POST /api/members\n{details, referralCode}
+activate API
+
+API -> ReferralSvc: ValidateReferralCode(code)
+activate ReferralSvc
+ReferralSvc -> DB: Find active referral code
+DB --> ReferralSvc: Code valid, referrer: Jane
+ReferralSvc --> API: Valid, referrerMemberId
+deactivate ReferralSvc
+
+API -> MemberSvc: EnrollMember(command)
+activate MemberSvc
+
+MemberSvc -> MemberSvc: Create member with referral link
+MemberSvc -> DB: Save new member
+activate DB
+DB --> MemberSvc: Saved
+deactivate DB
+
+MemberSvc -> Events: Publish(MemberEnrolled)
+MemberSvc --> API: New member created
+deactivate MemberSvc
+
+API -> ReferralSvc: ConvertReferral(code, newMemberId)
+activate ReferralSvc
+
+ReferralSvc -> DB: Update referral status
+activate DB
+DB --> ReferralSvc: Updated
+deactivate DB
+
+ReferralSvc -> PointsSvc: AwardBonusPoints(referrerId, bonus)
+activate PointsSvc
+PointsSvc -> DB: Create points transaction
+PointsSvc -> Events: Publish(PointsEarned)
+PointsSvc --> ReferralSvc: Referrer awarded 100 pts
+deactivate PointsSvc
+
+ReferralSvc -> PointsSvc: AwardBonusPoints(newMemberId, welcomeBonus)
+activate PointsSvc
+PointsSvc -> DB: Create points transaction
+PointsSvc --> ReferralSvc: New member awarded 50 pts
+deactivate PointsSvc
+
+ReferralSvc -> Events: Publish(ReferralConverted)
+activate Events
+Events --> ReferralSvc: Published
+deactivate Events
+
+ReferralSvc --> API: Referral converted
+deactivate ReferralSvc
+
+API --> UI: 201 Created\n{memberId, referralBonus}
+deactivate API
+
+UI --> Staff: Show success\n"Member enrolled!\nReferrer Jane earned 100 pts"
+deactivate UI
+
+@enduml

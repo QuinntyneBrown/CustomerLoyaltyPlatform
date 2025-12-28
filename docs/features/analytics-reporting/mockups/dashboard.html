@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard - Customer Loyalty Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #fafafa;
+            color: #333;
+        }
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 240px;
+            background-color: #3f51b5;
+            color: white;
+            padding: 16px 0;
+        }
+        .sidebar-header {
+            padding: 16px 24px;
+            font-size: 20px;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 8px;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .nav-item:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        .nav-item.active {
+            background-color: rgba(255,255,255,0.2);
+        }
+        .nav-item .material-icons {
+            margin-right: 16px;
+        }
+        .main-content {
+            flex: 1;
+            padding: 24px;
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .page-title {
+            font-size: 24px;
+            font-weight: 400;
+        }
+        .date-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .metric-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        }
+        .metric-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .metric-value {
+            font-size: 32px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        .metric-trend {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+        }
+        .metric-trend.up {
+            color: #4caf50;
+        }
+        .metric-trend.down {
+            color: #f44336;
+        }
+        .chart-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        .chart-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        }
+        .chart-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+        .chart-placeholder {
+            height: 250px;
+            background: linear-gradient(to right, #e3f2fd, #bbdefb);
+            border-radius: 4px;
+            display: flex;
+            align-items: flex-end;
+            padding: 16px;
+            gap: 8px;
+        }
+        .chart-bar {
+            flex: 1;
+            background: #3f51b5;
+            border-radius: 4px 4px 0 0;
+            min-height: 20px;
+        }
+        .bottom-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        .list-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        }
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .list-item:last-child {
+            border-bottom: none;
+        }
+        .list-item-name {
+            font-weight: 500;
+        }
+        .list-item-count {
+            color: #666;
+        }
+        .alert-badge {
+            background: #ff5722;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 14px;
+        }
+        .view-link {
+            color: #3f51b5;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .tier-distribution {
+            display: flex;
+            height: 200px;
+            gap: 16px;
+            align-items: flex-end;
+        }
+        .tier-bar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .tier-bar-fill {
+            width: 100%;
+            border-radius: 4px 4px 0 0;
+        }
+        .tier-bar-label {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #666;
+        }
+        .tier-bar-value {
+            font-weight: 500;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                Mike's Auto Rewards
+            </div>
+            <div class="nav-item active">
+                <span class="material-icons">dashboard</span>
+                Dashboard
+            </div>
+            <div class="nav-item">
+                <span class="material-icons">people</span>
+                Members
+            </div>
+            <div class="nav-item">
+                <span class="material-icons">stars</span>
+                Points
+            </div>
+            <div class="nav-item">
+                <span class="material-icons">card_giftcard</span>
+                Rewards
+            </div>
+            <div class="nav-item">
+                <span class="material-icons">campaign</span>
+                Campaigns
+            </div>
+            <div class="nav-item">
+                <span class="material-icons">analytics</span>
+                Analytics
+            </div>
+            <div class="nav-item">
+                <span class="material-icons">settings</span>
+                Settings
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Analytics Dashboard</h1>
+                <div class="date-selector">
+                    <span class="material-icons">calendar_today</span>
+                    Last 30 Days
+                    <span class="material-icons">arrow_drop_down</span>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Total Members</div>
+                    <div class="metric-value">1,250</div>
+                    <div class="metric-trend up">
+                        <span class="material-icons">trending_up</span>
+                        +12% from last month
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Points Issued</div>
+                    <div class="metric-value">125,000</div>
+                    <div class="metric-trend up">
+                        <span class="material-icons">trending_up</span>
+                        +8% from last month
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Redemptions</div>
+                    <div class="metric-value">450</div>
+                    <div class="metric-trend up">
+                        <span class="material-icons">trending_up</span>
+                        +15% from last month
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Revenue Tracked</div>
+                    <div class="metric-value">$15.2K</div>
+                    <div class="metric-trend up">
+                        <span class="material-icons">trending_up</span>
+                        +5% from last month
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <div class="chart-card">
+                    <div class="chart-title">Points Issued vs Redeemed</div>
+                    <div class="chart-placeholder">
+                        <div class="chart-bar" style="height: 60%;"></div>
+                        <div class="chart-bar" style="height: 45%;"></div>
+                        <div class="chart-bar" style="height: 75%;"></div>
+                        <div class="chart-bar" style="height: 55%;"></div>
+                        <div class="chart-bar" style="height: 80%;"></div>
+                        <div class="chart-bar" style="height: 65%;"></div>
+                        <div class="chart-bar" style="height: 90%;"></div>
+                        <div class="chart-bar" style="height: 70%;"></div>
+                        <div class="chart-bar" style="height: 85%;"></div>
+                        <div class="chart-bar" style="height: 95%;"></div>
+                        <div class="chart-bar" style="height: 75%;"></div>
+                        <div class="chart-bar" style="height: 100%;"></div>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Member Tier Distribution</div>
+                    <div class="tier-distribution">
+                        <div class="tier-bar">
+                            <div class="tier-bar-fill" style="height: 100%; background: #cd7f32;"></div>
+                            <div class="tier-bar-label">Bronze</div>
+                            <div class="tier-bar-value">650</div>
+                        </div>
+                        <div class="tier-bar">
+                            <div class="tier-bar-fill" style="height: 60%; background: #c0c0c0;"></div>
+                            <div class="tier-bar-label">Silver</div>
+                            <div class="tier-bar-value">380</div>
+                        </div>
+                        <div class="tier-bar">
+                            <div class="tier-bar-fill" style="height: 30%; background: #ffd700;"></div>
+                            <div class="tier-bar-label">Gold</div>
+                            <div class="tier-bar-value">180</div>
+                        </div>
+                        <div class="tier-bar">
+                            <div class="tier-bar-fill" style="height: 10%; background: #e5e4e2;"></div>
+                            <div class="tier-bar-label">Platinum</div>
+                            <div class="tier-bar-value">40</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-section">
+                <div class="list-card">
+                    <div class="list-header">
+                        <div class="chart-title">Top Rewards</div>
+                        <a href="#" class="view-link">View All</a>
+                    </div>
+                    <div class="list-item">
+                        <span class="list-item-name">Free Oil Change</span>
+                        <span class="list-item-count">156 redemptions</span>
+                    </div>
+                    <div class="list-item">
+                        <span class="list-item-name">$10 Off Service</span>
+                        <span class="list-item-count">124 redemptions</span>
+                    </div>
+                    <div class="list-item">
+                        <span class="list-item-name">Free Car Wash</span>
+                        <span class="list-item-count">98 redemptions</span>
+                    </div>
+                    <div class="list-item">
+                        <span class="list-item-name">$25 Off Parts</span>
+                        <span class="list-item-count">72 redemptions</span>
+                    </div>
+                </div>
+                <div class="list-card">
+                    <div class="list-header">
+                        <div class="chart-title">At-Risk Members</div>
+                        <span class="alert-badge">12 members</span>
+                    </div>
+                    <div class="list-item">
+                        <div>
+                            <div class="list-item-name">John Wilson</div>
+                            <div style="font-size: 12px; color: #666;">45 days inactive</div>
+                        </div>
+                        <a href="#" class="view-link">View</a>
+                    </div>
+                    <div class="list-item">
+                        <div>
+                            <div class="list-item-name">Mary Johnson</div>
+                            <div style="font-size: 12px; color: #666;">38 days inactive</div>
+                        </div>
+                        <a href="#" class="view-link">View</a>
+                    </div>
+                    <div class="list-item">
+                        <div>
+                            <div class="list-item-name">Robert Davis</div>
+                            <div style="font-size: 12px; color: #666;">35 days inactive</div>
+                        </div>
+                        <a href="#" class="view-link">View</a>
+                    </div>
+                    <div class="list-item">
+                        <a href="#" class="view-link">View all at-risk members →</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

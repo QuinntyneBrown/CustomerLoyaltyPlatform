@@ -1,0 +1,185 @@
+@startuml Campaigns Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor White
+    ArrowColor Black
+    BorderColor Black
+}
+
+package "Campaigns Domain" {
+
+    enum CampaignType {
+        BonusPoints
+        DoublePoints
+        SpecialReward
+        Referral
+    }
+
+    enum CampaignStatus {
+        Draft
+        Scheduled
+        Active
+        Completed
+        Cancelled
+    }
+
+    enum TargetAudience {
+        AllMembers
+        NewMembers
+        InactiveMembers
+        TopSpenders
+        TierSpecific
+    }
+
+    enum ReferralStatus {
+        Pending
+        Converted
+        Expired
+    }
+
+    class Campaign {
+        +CampaignId: Guid
+        +TenantId: Guid
+        +ProgramId: Guid
+        +CampaignName: string
+        +CampaignType: CampaignType
+        +Description: string
+        +StartDate: DateTime
+        +EndDate: DateTime
+        +TargetAudience: TargetAudience
+        +TargetTiers: List<Guid>?
+        +BonusPointsAmount: int?
+        +PointsMultiplier: decimal?
+        +Status: CampaignStatus
+        +TotalParticipants: int
+        +TotalPointsAwarded: int
+        +CreatedBy: Guid
+        +CreatedAt: DateTime
+        +CancelledBy: Guid?
+        +CancellationReason: string?
+        --
+        +Activate(): void
+        +End(): void
+        +Cancel(reason: string, cancelledBy: Guid): void
+        +IsActive(): bool
+        +MemberQualifies(member: Member): bool
+    }
+
+    class CampaignParticipation {
+        +ParticipationId: Guid
+        +CampaignId: Guid
+        +MemberId: Guid
+        +TenantId: Guid
+        +PointsEarned: int
+        +ParticipatedAt: DateTime
+    }
+
+    class ReferralCode {
+        +ReferralCodeId: Guid
+        +TenantId: Guid
+        +MemberId: Guid
+        +ProgramId: Guid
+        +Code: string
+        +IsActive: bool
+        +GeneratedAt: DateTime
+        --
+        +Deactivate(): void
+    }
+
+    class Referral {
+        +ReferralId: Guid
+        +TenantId: Guid
+        +ReferrerMemberId: Guid
+        +RefereeName: string
+        +RefereeContact: string
+        +ReferralCodeUsed: string
+        +Status: ReferralStatus
+        +NewMemberId: Guid?
+        +ReferrerPointsAwarded: int?
+        +RefereeBonusAwarded: int?
+        +SubmittedAt: DateTime
+        +ConvertedAt: DateTime?
+        +ExpiredAt: DateTime?
+        --
+        +Convert(newMemberId: Guid): void
+        +Expire(): void
+    }
+
+    Campaign "1" *-- "many" CampaignParticipation
+    ReferralCode "1" -- "many" Referral
+}
+
+package "Tier Domain" {
+
+    enum DemotionReason {
+        InactivityPeriod
+        AnnualReset
+        InsufficientSpend
+    }
+
+    class MemberTier {
+        +MemberTierId: Guid
+        +MemberId: Guid
+        +TenantId: Guid
+        +ProgramId: Guid
+        +TierId: Guid
+        +TierName: string
+        +AchievedAt: DateTime
+        +EvaluationPeriodStart: DateTime
+        +EvaluationPeriodEnd: DateTime
+        +PointsInPeriod: int
+    }
+
+    class TierEvaluation {
+        +EvaluationId: Guid
+        +ProgramId: Guid
+        +TenantId: Guid
+        +EvaluationPeriod: string
+        +MembersPromoted: int
+        +MembersDemoted: int
+        +MembersMaintained: int
+        +CompletedAt: DateTime
+    }
+}
+
+package "Campaign Services" {
+
+    interface ICampaignService {
+        +CreateCampaign(command: CreateCampaignCommand): Task<Campaign>
+        +GetCampaign(campaignId: Guid): Task<Campaign>
+        +GetActiveCampaigns(programId: Guid): Task<List<Campaign>>
+        +CancelCampaign(campaignId: Guid, reason: string): Task
+        +ProcessCampaignActivation(): Task
+        +ProcessCampaignEnding(): Task
+    }
+
+    interface IReferralService {
+        +GenerateReferralCode(memberId: Guid): Task<ReferralCode>
+        +SubmitReferral(command: SubmitReferralCommand): Task<Referral>
+        +ConvertReferral(referralId: Guid, newMemberId: Guid): Task
+        +GetMemberReferrals(memberId: Guid): Task<List<Referral>>
+    }
+
+    interface ITierEvaluationService {
+        +EvaluateMemberTier(memberId: Guid): Task<TierChange?>
+        +RunProgramTierEvaluation(programId: Guid): Task<TierEvaluation>
+        +GetMemberTierProgress(memberId: Guid): Task<TierProgress>
+    }
+
+    class CampaignService {
+        -_context: ICustomerLoyaltyPlatformContext
+        -_eventPublisher: IEventPublisher
+    }
+
+    class ReferralService {
+        -_context: ICustomerLoyaltyPlatformContext
+        -_eventPublisher: IEventPublisher
+        -_pointsService: IPointsService
+    }
+
+    CampaignService ..|> ICampaignService
+    ReferralService ..|> IReferralService
+}
+
+@enduml

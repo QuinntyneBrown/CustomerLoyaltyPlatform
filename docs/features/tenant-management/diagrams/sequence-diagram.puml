@@ -1,0 +1,53 @@
+@startuml Tenant Provisioning Sequence Diagram
+
+skinparam sequenceArrowThickness 2
+skinparam sequenceParticipant underline
+
+title Tenant Provisioning Flow
+
+actor "Platform Admin" as Admin
+participant "API Controller" as API
+participant "TenantService" as Service
+participant "ICustomerLoyaltyPlatformContext" as DB
+participant "Event Publisher" as Events
+participant "Notification Service" as Notify
+
+Admin -> API: POST /api/tenants\n{tenantName, email, planType}
+activate API
+
+API -> API: Validate request
+API -> Service: ProvisionTenant(command)
+activate Service
+
+Service -> DB: Check slug uniqueness
+activate DB
+DB --> Service: Slug available
+deactivate DB
+
+Service -> Service: Generate TenantId
+Service -> Service: Create Tenant entity
+Service -> Service: Create default settings
+Service -> Service: Create default limits
+
+Service -> DB: SaveChangesAsync()
+activate DB
+DB --> Service: Saved
+deactivate DB
+
+Service -> Events: Publish(TenantProvisioned)
+activate Events
+Events --> Service: Published
+deactivate Events
+
+Service --> API: Tenant created
+deactivate Service
+
+API -> Notify: SendWelcomeEmail(tenant)
+activate Notify
+Notify --> API: Email queued
+deactivate Notify
+
+API --> Admin: 201 Created\n{tenantId, status: Pending}
+deactivate API
+
+@enduml

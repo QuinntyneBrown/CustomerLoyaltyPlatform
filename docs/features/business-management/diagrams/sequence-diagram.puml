@@ -1,0 +1,58 @@
+@startuml Business Registration Sequence
+
+skinparam sequenceArrowThickness 2
+skinparam sequenceParticipant underline
+
+title Business Registration Flow
+
+actor "Business Owner" as Owner
+participant "Registration Wizard" as UI
+participant "API Controller" as API
+participant "BusinessService" as Service
+participant "ICustomerLoyaltyPlatformContext" as DB
+participant "Event Publisher" as Events
+participant "Verification Service" as Verify
+
+Owner -> UI: Start registration wizard
+activate UI
+
+Owner -> UI: Enter business details\n(name, type, contact, address)
+UI -> UI: Validate each step
+
+Owner -> UI: Confirm registration
+UI -> API: POST /api/businesses\n{businessDetails}
+activate API
+
+API -> Service: RegisterBusiness(command)
+activate Service
+
+Service -> Service: Validate business data
+Service -> Service: Generate BusinessId
+Service -> Service: Create Business entity
+
+Service -> DB: SaveChangesAsync()
+activate DB
+DB --> Service: Saved
+deactivate DB
+
+Service -> Events: Publish(BusinessRegistered)
+activate Events
+Events --> Service: Published
+deactivate Events
+
+Service --> API: Business created
+deactivate Service
+
+API --> UI: 201 Created\n{businessId}
+deactivate API
+
+UI --> Owner: Show success\nRedirect to verification
+
+UI -> Verify: InitiateEmailVerification(businessId)
+activate Verify
+Verify --> UI: Verification code sent
+deactivate Verify
+
+UI --> Owner: Show verification form
+
+@enduml

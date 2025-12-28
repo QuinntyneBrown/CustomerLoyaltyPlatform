@@ -1,0 +1,177 @@
+@startuml Analytics Reporting Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor White
+    ArrowColor Black
+    BorderColor Black
+}
+
+package "Analytics Domain" {
+
+    enum ReportType {
+        Daily
+        Weekly
+        Monthly
+        Custom
+    }
+
+    enum ReportStatus {
+        Pending
+        Processing
+        Completed
+        Failed
+    }
+
+    enum MilestoneType {
+        MemberCount
+        PointsIssued
+        RedemptionCount
+        Revenue
+    }
+
+    enum EngagementLevel {
+        High
+        Medium
+        Low
+        AtRisk
+        Churned
+    }
+
+    class Report {
+        +ReportId: Guid
+        +TenantId: Guid
+        +BusinessId: Guid
+        +ReportType: ReportType
+        +ReportName: string
+        +DateRangeStart: DateTime
+        +DateRangeEnd: DateTime
+        +Parameters: Dictionary<string, object>
+        +Status: ReportStatus
+        +FileUrl: string?
+        +FileSize: long?
+        +GeneratedBy: Guid
+        +GeneratedAt: DateTime
+        +CompletedAt: DateTime?
+        --
+        +MarkProcessing(): void
+        +MarkCompleted(fileUrl: string): void
+        +MarkFailed(error: string): void
+    }
+
+    class Milestone {
+        +MilestoneId: Guid
+        +TenantId: Guid
+        +BusinessId: Guid
+        +ProgramId: Guid
+        +MilestoneType: MilestoneType
+        +MilestoneValue: int
+        +AchievedAt: DateTime
+        +PreviousMilestone: int?
+    }
+
+    class MemberEngagementScore {
+        +ScoreId: Guid
+        +TenantId: Guid
+        +MemberId: Guid
+        +ProgramId: Guid
+        +EngagementScore: int
+        +EngagementLevel: EngagementLevel
+        +ScoreFactors: Dictionary<string, int>
+        +ScoredAt: DateTime
+        --
+        +CalculateLevel(): EngagementLevel
+    }
+
+    class ChurnRisk {
+        +RiskId: Guid
+        +TenantId: Guid
+        +MemberId: Guid
+        +ProgramId: Guid
+        +RiskScore: int
+        +LastActivityDate: DateTime?
+        +DaysSinceActivity: int
+        +RecommendedAction: string
+        +IdentifiedAt: DateTime
+        --
+        +GetRiskLevel(): string
+    }
+
+    class DashboardMetrics <<ValueObject>> {
+        +TotalMembers: int
+        +NewMembers: int
+        +ActiveMembers: int
+        +TotalPointsIssued: long
+        +TotalPointsRedeemed: long
+        +RedemptionRate: decimal
+        +AveragePointsPerMember: decimal
+        +AtRiskMemberCount: int
+        +PeriodStart: DateTime
+        +PeriodEnd: DateTime
+    }
+}
+
+package "Analytics Services" {
+
+    interface IAnalyticsService {
+        +GetDashboardMetrics(tenantId: Guid, period: DateRange): Task<DashboardMetrics>
+        +GetMemberAnalytics(tenantId: Guid, period: DateRange): Task<MemberAnalytics>
+        +GetTransactionAnalytics(tenantId: Guid, period: DateRange): Task<TransactionAnalytics>
+        +GetRewardAnalytics(tenantId: Guid, period: DateRange): Task<RewardAnalytics>
+        +GetCampaignAnalytics(tenantId: Guid, period: DateRange): Task<CampaignAnalytics>
+    }
+
+    interface IReportService {
+        +GenerateReport(command: GenerateReportCommand): Task<Report>
+        +GetReport(reportId: Guid): Task<Report>
+        +GetReportHistory(tenantId: Guid): Task<List<Report>>
+        +DownloadReport(reportId: Guid): Task<Stream>
+    }
+
+    interface IEngagementService {
+        +CalculateEngagementScore(memberId: Guid): Task<MemberEngagementScore>
+        +GetEngagementScores(programId: Guid): Task<List<MemberEngagementScore>>
+        +RunEngagementScoring(programId: Guid): Task<int>
+    }
+
+    interface IChurnRiskService {
+        +IdentifyChurnRisks(programId: Guid): Task<List<ChurnRisk>>
+        +GetAtRiskMembers(programId: Guid, threshold: int): Task<List<ChurnRisk>>
+        +GetRecommendedActions(memberId: Guid): Task<List<string>>
+    }
+
+    interface IMilestoneService {
+        +CheckMilestones(businessId: Guid): Task<List<Milestone>>
+        +GetMilestoneHistory(businessId: Guid): Task<List<Milestone>>
+        +GetNextMilestone(businessId: Guid, type: MilestoneType): Task<int>
+    }
+
+    class AnalyticsService {
+        -_context: ICustomerLoyaltyPlatformContext
+        -_cache: IDistributedCache
+    }
+
+    class ReportService {
+        -_context: ICustomerLoyaltyPlatformContext
+        -_eventPublisher: IEventPublisher
+        -_reportGenerator: IReportGenerator
+        -_storageService: IStorageService
+    }
+
+    class EngagementService {
+        -_context: ICustomerLoyaltyPlatformContext
+        -_eventPublisher: IEventPublisher
+    }
+
+    class ChurnRiskService {
+        -_context: ICustomerLoyaltyPlatformContext
+        -_eventPublisher: IEventPublisher
+    }
+
+    AnalyticsService ..|> IAnalyticsService
+    ReportService ..|> IReportService
+    EngagementService ..|> IEngagementService
+    ChurnRiskService ..|> IChurnRiskService
+}
+
+@enduml

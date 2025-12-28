@@ -1,0 +1,171 @@
+@startuml Points Transactions Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor White
+    ArrowColor Black
+    BorderColor Black
+}
+
+package "Points Transaction Domain" {
+
+    enum TransactionType {
+        Earn
+        Redeem
+        Adjust
+        Expire
+        Transfer
+        Clawback
+    }
+
+    enum EarningType {
+        Purchase
+        Referral
+        Bonus
+        Promotion
+        Birthday
+        SignUp
+    }
+
+    enum AdjustmentReason {
+        Correction
+        GoodwillGesture
+        SystemError
+        Promotion
+        Other
+    }
+
+    enum RefundType {
+        Full
+        Partial
+    }
+
+    class PointsTransaction {
+        +TransactionId: Guid
+        +TenantId: Guid
+        +MemberId: Guid
+        +ProgramId: Guid
+        +TransactionType: TransactionType
+        +PointsAmount: int
+        +BalanceAfter: int
+        +EarningType: EarningType?
+        +RewardId: Guid?
+        +SourceTransactionId: Guid?
+        +Description: string
+        +Notes: string?
+        +ProcessedBy: Guid
+        +ExpiresAt: DateTime?
+        +ExpiredAt: DateTime?
+        +CreatedAt: DateTime
+        --
+        +IsExpired(): bool
+        +WillExpire(warningDays: int): bool
+    }
+
+    class Purchase {
+        +PurchaseId: Guid
+        +TenantId: Guid
+        +BusinessId: Guid
+        +MemberId: Guid?
+        +TotalAmount: decimal
+        +SubTotal: decimal
+        +TaxAmount: decimal
+        +DiscountApplied: decimal
+        +PaymentMethod: string
+        +ReceiptNumber: string
+        +Items: List<PurchaseItem>
+        +LocationId: Guid?
+        +RecordedBy: Guid
+        +RecordedAt: DateTime
+        +LinkedAt: DateTime?
+        +RefundedAmount: decimal
+        --
+        +IsLinked(): bool
+        +CanLink(): bool
+        +GetEligibleAmount(): decimal
+    }
+
+    class PurchaseItem <<ValueObject>> {
+        +ItemName: string
+        +Quantity: int
+        +UnitPrice: decimal
+        +Category: string?
+    }
+
+    class Refund {
+        +RefundId: Guid
+        +TenantId: Guid
+        +OriginalPurchaseId: Guid
+        +MemberId: Guid?
+        +RefundAmount: decimal
+        +RefundType: RefundType
+        +PointsClawedBack: int
+        +Reason: string?
+        +RefundedBy: Guid
+        +RefundedAt: DateTime
+    }
+
+    class PointsTransfer {
+        +TransferId: Guid
+        +TenantId: Guid
+        +FromMemberId: Guid
+        +ToMemberId: Guid
+        +ProgramId: Guid
+        +PointsAmount: int
+        +ApprovedBy: Guid?
+        +TransferredAt: DateTime
+    }
+
+    Purchase "1" *-- "many" PurchaseItem
+    Purchase "1" -- "many" Refund
+    PointsTransaction "many" -- "1" Purchase : sourceTransaction
+}
+
+package "Points Transaction Services" {
+
+    interface IPointsService {
+        +EarnPoints(command: EarnPointsCommand): Task<PointsTransaction>
+        +RedeemPoints(command: RedeemPointsCommand): Task<PointsTransaction>
+        +AdjustPoints(command: AdjustPointsCommand): Task<PointsTransaction>
+        +TransferPoints(command: TransferPointsCommand): Task<PointsTransfer>
+        +GetBalance(memberId: Guid): Task<int>
+        +GetExpiringPoints(memberId: Guid, days: int): Task<int>
+    }
+
+    interface IPurchaseService {
+        +RecordPurchase(command: RecordPurchaseCommand): Task<Purchase>
+        +LinkPurchaseToMember(purchaseId: Guid, memberId: Guid): Task
+        +ProcessRefund(command: RefundCommand): Task<Refund>
+        +GetPurchaseHistory(memberId: Guid): Task<List<Purchase>>
+    }
+
+    interface IPointsExpirationService {
+        +ProcessExpiredPoints(): Task<int>
+        +GetMembersWithExpiringPoints(days: int): Task<List<MemberExpiringPoints>>
+        +TriggerExpirationWarnings(): Task
+    }
+
+    class PointsService {
+        -_context: ICustomerLoyaltyPlatformContext
+        -_eventPublisher: IEventPublisher
+        -_earningRuleService: IEarningRuleService
+    }
+
+    class PurchaseService {
+        -_context: ICustomerLoyaltyPlatformContext
+        -_eventPublisher: IEventPublisher
+        -_pointsService: IPointsService
+    }
+
+    class PointsExpirationService {
+        -_context: ICustomerLoyaltyPlatformContext
+        -_eventPublisher: IEventPublisher
+        -_notificationService: INotificationService
+    }
+
+    PointsService ..|> IPointsService
+    PurchaseService ..|> IPurchaseService
+    PointsExpirationService ..|> IPointsExpirationService
+}
+
+@enduml
