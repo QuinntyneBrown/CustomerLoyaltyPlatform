@@ -1,0 +1,88 @@
+@startuml Analytics Reporting Use Case Diagram
+
+skinparam actorStyle awesome
+skinparam usecase {
+    BackgroundColor White
+    BorderColor Black
+}
+
+left to right direction
+
+actor "Business Owner" as Owner
+actor "Manager" as Manager
+actor "System" as System
+
+rectangle "Analytics & Reporting" {
+
+    usecase "View Dashboard" as UC1
+    usecase "View Member Analytics" as UC2
+    usecase "View Transaction Analytics" as UC3
+    usecase "View Reward Analytics" as UC4
+    usecase "View Campaign Analytics" as UC5
+    usecase "Generate Report" as UC6
+    usecase "Download Report" as UC7
+    usecase "View Report History" as UC8
+    usecase "View At-Risk Members" as UC9
+    usecase "View Engagement Scores" as UC10
+    usecase "View Milestones" as UC11
+    usecase "Export Data" as UC12
+    usecase "Configure Dashboard" as UC13
+
+    usecase "Calculate Engagement Scores" as UC_ENGAGE
+    usecase "Identify Churn Risks" as UC_CHURN
+    usecase "Check Milestones" as UC_MILE
+    usecase "Generate Report File" as UC_GEN
+    usecase "Refresh Metrics Cache" as UC_CACHE
+}
+
+' Owner relationships
+Owner --> UC1
+Owner --> UC2
+Owner --> UC3
+Owner --> UC4
+Owner --> UC5
+Owner --> UC6
+Owner --> UC7
+Owner --> UC8
+Owner --> UC9
+Owner --> UC10
+Owner --> UC11
+Owner --> UC12
+Owner --> UC13
+
+' Manager relationships
+Manager --> UC1
+Manager --> UC2
+Manager --> UC3
+Manager --> UC4
+Manager --> UC5
+Manager --> UC6
+Manager --> UC7
+Manager --> UC8
+Manager --> UC9
+Manager --> UC10
+
+' System relationships
+System --> UC_ENGAGE
+System --> UC_CHURN
+System --> UC_MILE
+System --> UC_GEN
+System --> UC_CACHE
+
+' Includes
+UC6 ..> UC_GEN : <<include>>
+UC9 ..> UC_CHURN : <<include>>
+UC10 ..> UC_ENGAGE : <<include>>
+
+note right of UC_ENGAGE
+    Runs as scheduled job.
+    Scores all active members.
+end note
+
+note right of UC_CHURN
+    Runs daily.
+    Identifies inactive members.
+    Recommends interventions.
+end note
+
+@enduml

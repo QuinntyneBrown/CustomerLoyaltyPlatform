@@ -1,0 +1,91 @@
+@startuml Member Management Use Case Diagram
+
+skinparam actorStyle awesome
+skinparam usecase {
+    BackgroundColor White
+    BorderColor Black
+}
+
+left to right direction
+
+actor "Staff" as Staff
+actor "Member" as Member
+actor "Manager" as Manager
+actor "System" as System
+
+rectangle "Member Management" {
+
+    usecase "Enroll New Member" as UC1
+    usecase "Search Members" as UC2
+    usecase "View Member Profile" as UC3
+    usecase "Update Member Profile" as UC4
+    usecase "Issue Loyalty Card" as UC5
+    usecase "Replace Lost Card" as UC6
+    usecase "View Points Balance" as UC7
+    usecase "View Transaction History" as UC8
+    usecase "Update Marketing Preferences" as UC9
+    usecase "Deactivate Member" as UC10
+    usecase "Reactivate Member" as UC11
+    usecase "Merge Duplicate Members" as UC12
+    usecase "Access Self-Service Portal" as UC13
+    usecase "View Digital Card" as UC14
+    usecase "Export Member Data" as UC15
+
+    usecase "Generate Card Barcode" as UC_BARCODE
+    usecase "Send Welcome Email" as UC_WELCOME
+    usecase "Check Duplicates" as UC_DUP
+}
+
+' Staff relationships
+Staff --> UC1
+Staff --> UC2
+Staff --> UC3
+Staff --> UC4
+Staff --> UC5
+Staff --> UC6
+Staff --> UC7
+Staff --> UC8
+
+' Manager relationships
+Manager --> UC1
+Manager --> UC2
+Manager --> UC3
+Manager --> UC4
+Manager --> UC5
+Manager --> UC6
+Manager --> UC10
+Manager --> UC11
+Manager --> UC12
+Manager --> UC15
+
+' Member relationships
+Member --> UC13
+Member --> UC14
+Member --> UC7
+Member --> UC8
+Member --> UC9
+Member --> UC4
+
+' System relationships
+System --> UC_BARCODE
+System --> UC_WELCOME
+System --> UC_DUP
+
+' Includes
+UC1 ..> UC_DUP : <<include>>
+UC1 ..> UC_WELCOME : <<include>>
+UC5 ..> UC_BARCODE : <<include>>
+
+note right of UC12
+    Requires Manager role.
+    Combines points and
+    transaction history.
+end note
+
+note right of UC13
+    Member self-service
+    portal accessible via
+    web or mobile.
+end note
+
+@enduml

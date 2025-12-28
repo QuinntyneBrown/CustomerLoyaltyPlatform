@@ -1,0 +1,83 @@
+@startuml Create Loyalty Program Sequence
+
+skinparam sequenceArrowThickness 2
+skinparam sequenceParticipant underline
+
+title Create Loyalty Program Flow
+
+actor "Business Owner" as Owner
+participant "Program Wizard" as UI
+participant "API Controller" as API
+participant "LoyaltyProgramService" as ProgramSvc
+participant "EarningRuleService" as EarningSvc
+participant "RedemptionRuleService" as RedemptionSvc
+participant "ICustomerLoyaltyPlatformContext" as DB
+participant "Event Publisher" as Events
+
+Owner -> UI: Start program setup
+activate UI
+
+UI --> Owner: Show program type selection
+
+Owner -> UI: Select "Points Based"
+Owner -> UI: Enter program name\nand points name
+
+UI --> Owner: Show earning rule config
+
+Owner -> UI: Configure earning rule\n(1 point per $1 spent)
+
+UI --> Owner: Show redemption rule config
+
+Owner -> UI: Configure redemption\n($5 off for 100 points)
+
+Owner -> UI: Review and confirm
+
+UI -> API: POST /api/programs\n{programConfig}
+activate API
+
+API -> ProgramSvc: CreateProgram(command)
+activate ProgramSvc
+
+ProgramSvc -> DB: Save LoyaltyProgram
+activate DB
+DB --> ProgramSvc: Saved
+deactivate DB
+
+ProgramSvc -> Events: Publish(LoyaltyProgramCreated)
+activate Events
+Events --> ProgramSvc: Published
+deactivate Events
+
+ProgramSvc --> API: Program created
+deactivate ProgramSvc
+
+API -> EarningSvc: ConfigureRule(earningRule)
+activate EarningSvc
+
+EarningSvc -> DB: Save EarningRule
+activate DB
+DB --> EarningSvc: Saved
+deactivate DB
+
+EarningSvc -> Events: Publish(EarningRuleConfigured)
+EarningSvc --> API: Rule configured
+deactivate EarningSvc
+
+API -> RedemptionSvc: ConfigureRule(redemptionRule)
+activate RedemptionSvc
+
+RedemptionSvc -> DB: Save RedemptionRule
+activate DB
+DB --> RedemptionSvc: Saved
+deactivate DB
+
+RedemptionSvc -> Events: Publish(RedemptionRuleConfigured)
+RedemptionSvc --> API: Rule configured
+deactivate RedemptionSvc
+
+API --> UI: 201 Created\n{programId}
+deactivate API
+
+UI --> Owner: Show success\nProgram ready for members
+
+@enduml

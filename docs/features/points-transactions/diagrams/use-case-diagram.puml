@@ -1,0 +1,85 @@
+@startuml Points Transactions Use Case Diagram
+
+skinparam actorStyle awesome
+skinparam usecase {
+    BackgroundColor White
+    BorderColor Black
+}
+
+left to right direction
+
+actor "Staff" as Staff
+actor "Manager" as Manager
+actor "Member" as Member
+actor "System" as System
+
+rectangle "Points & Transactions" {
+
+    usecase "Record Purchase" as UC1
+    usecase "Award Points for Purchase" as UC2
+    usecase "Redeem Points" as UC3
+    usecase "Adjust Points Manually" as UC4
+    usecase "Transfer Points" as UC5
+    usecase "View Transaction History" as UC6
+    usecase "View Points Balance" as UC7
+    usecase "Link Purchase to Member" as UC8
+    usecase "Process Refund" as UC9
+    usecase "View Expiring Points" as UC10
+    usecase "Export Transactions" as UC11
+
+    usecase "Calculate Points from Rules" as UC_CALC
+    usecase "Process Point Expiration" as UC_EXPIRE
+    usecase "Send Expiration Warning" as UC_WARN
+    usecase "Clawback Points for Refund" as UC_CLAW
+}
+
+' Staff relationships
+Staff --> UC1
+Staff --> UC2
+Staff --> UC3
+Staff --> UC6
+Staff --> UC7
+Staff --> UC8
+
+' Manager relationships
+Manager --> UC1
+Manager --> UC2
+Manager --> UC3
+Manager --> UC4
+Manager --> UC5
+Manager --> UC6
+Manager --> UC7
+Manager --> UC8
+Manager --> UC9
+Manager --> UC11
+
+' Member relationships
+Member --> UC3
+Member --> UC6
+Member --> UC7
+Member --> UC10
+
+' System relationships
+System --> UC_CALC
+System --> UC_EXPIRE
+System --> UC_WARN
+System --> UC_CLAW
+
+' Includes
+UC1 ..> UC2 : <<include>>
+UC2 ..> UC_CALC : <<include>>
+UC9 ..> UC_CLAW : <<include>>
+UC_EXPIRE ..> UC_WARN : <<include>>
+
+note right of UC4
+    Requires Manager role.
+    Audit trail required.
+end note
+
+note right of UC_EXPIRE
+    Runs as scheduled job.
+    Processes based on
+    expiration policy.
+end note
+
+@enduml

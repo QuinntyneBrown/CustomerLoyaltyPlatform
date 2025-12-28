@@ -1,0 +1,78 @@
+@startuml User Invitation Acceptance Sequence
+
+skinparam sequenceArrowThickness 2
+skinparam sequenceParticipant underline
+
+title User Invitation Acceptance Flow
+
+actor "Invited User" as User
+participant "Invitation Page" as Page
+participant "API Controller" as API
+participant "TenantUserService" as Service
+participant "ICustomerLoyaltyPlatformContext" as DB
+participant "Event Publisher" as Events
+
+User -> Page: Click invitation link\n/accept?token=xyz
+activate Page
+
+Page -> API: POST /api/invitations/{token}/validate
+activate API
+
+API -> Service: ValidateInvitation(token)
+activate Service
+
+Service -> DB: Find invitation by token
+activate DB
+DB --> Service: Invitation found
+deactivate DB
+
+Service -> Service: Check expiration
+Service -> Service: Check status
+
+Service --> API: Invitation valid\n{email, role, tenantName}
+deactivate Service
+
+API --> Page: 200 OK\n{invitationDetails}
+deactivate API
+
+Page --> User: Show invitation details\nand profile form
+
+User -> Page: Submit profile\n{name, password}
+activate Page
+
+Page -> API: POST /api/invitations/{token}/accept\n{name, password}
+activate API
+
+API -> Service: AcceptInvitation(token, profile)
+activate Service
+
+Service -> DB: Create User account
+activate DB
+DB --> Service: User created
+deactivate DB
+
+Service -> DB: Create TenantUser link
+activate DB
+DB --> Service: TenantUser created
+deactivate DB
+
+Service -> DB: Update invitation status
+activate DB
+DB --> Service: Updated
+deactivate DB
+
+Service -> Events: Publish(TenantUserJoined)
+activate Events
+Events --> Service: Published
+deactivate Events
+
+Service --> API: TenantUser created
+deactivate Service
+
+API --> Page: 201 Created\n{userId, tenantId}
+deactivate API
+
+Page --> User: Redirect to\ntenant dashboard
+deactivate Page
+
+@enduml

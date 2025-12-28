@@ -1,0 +1,136 @@
+@startuml Rewards Management Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor White
+    ArrowColor Black
+    BorderColor Black
+}
+
+package "Rewards Domain" {
+
+    enum RewardType {
+        Discount
+        FreeItem
+        Service
+        Experience
+        GiftCard
+    }
+
+    enum RedemptionStatus {
+        Active
+        Used
+        Expired
+        Cancelled
+    }
+
+    class Reward {
+        +RewardId: Guid
+        +TenantId: Guid
+        +ProgramId: Guid
+        +RewardName: string
+        +RewardDescription: string
+        +RewardType: RewardType
+        +PointsCost: int
+        +DollarValue: decimal
+        +ImageUrl: string?
+        +InventoryLimit: int?
+        +CurrentInventory: int?
+        +ValidFrom: DateTime
+        +ValidUntil: DateTime?
+        +IsActive: bool
+        +IsRetired: bool
+        +TotalRedemptions: int
+        +CreatedBy: Guid
+        +CreatedAt: DateTime
+        +UpdatedAt: DateTime
+        --
+        +IsAvailable(): bool
+        +HasInventory(): bool
+        +DecrementInventory(): void
+        +Restock(quantity: int): void
+        +Retire(): void
+        +CanRedeem(): bool
+    }
+
+    class RewardRedemption {
+        +RedemptionId: Guid
+        +TenantId: Guid
+        +RewardId: Guid
+        +MemberId: Guid
+        +TransactionId: Guid
+        +PointsSpent: int
+        +RedemptionCode: string
+        +Status: RedemptionStatus
+        +ProcessedBy: Guid
+        +RedeemedAt: DateTime
+        +UsedAt: DateTime?
+        +ExpiresAt: DateTime?
+        --
+        +MarkAsUsed(): void
+        +Cancel(): void
+        +IsExpired(): bool
+    }
+
+    class RewardInventoryLog {
+        +LogId: Guid
+        +RewardId: Guid
+        +TenantId: Guid
+        +ChangeType: string
+        +QuantityChange: int
+        +BalanceAfter: int
+        +Reason: string?
+        +ChangedBy: Guid
+        +ChangedAt: DateTime
+    }
+
+    Reward "1" *-- "many" RewardRedemption
+    Reward "1" *-- "many" RewardInventoryLog
+}
+
+package "Rewards Services" {
+
+    interface IRewardService {
+        +CreateReward(command: CreateRewardCommand): Task<Reward>
+        +UpdateReward(rewardId: Guid, updates: Dictionary): Task
+        +GetReward(rewardId: Guid): Task<Reward>
+        +GetAvailableRewards(programId: Guid): Task<List<Reward>>
+        +GetAffordableRewards(memberId: Guid): Task<List<Reward>>
+        +RetireReward(rewardId: Guid): Task
+    }
+
+    interface IRewardInventoryService {
+        +Restock(rewardId: Guid, quantity: int, reason: string): Task
+        +CheckInventory(rewardId: Guid): Task<int?>
+        +GetLowInventoryRewards(threshold: int): Task<List<Reward>>
+    }
+
+    interface IRewardRedemptionService {
+        +RedeemReward(memberId: Guid, rewardId: Guid): Task<RewardRedemption>
+        +GetMemberRedemptions(memberId: Guid): Task<List<RewardRedemption>>
+        +MarkRedemptionUsed(redemptionId: Guid): Task
+        +ValidateRedemptionCode(code: string): Task<RewardRedemption?>
+    }
+
+    class RewardService {
+        -_context: ICustomerLoyaltyPlatformContext
+        -_eventPublisher: IEventPublisher
+    }
+
+    class RewardInventoryService {
+        -_context: ICustomerLoyaltyPlatformContext
+        -_eventPublisher: IEventPublisher
+    }
+
+    class RewardRedemptionService {
+        -_context: ICustomerLoyaltyPlatformContext
+        -_eventPublisher: IEventPublisher
+        -_pointsService: IPointsService
+    }
+
+    RewardService ..|> IRewardService
+    RewardInventoryService ..|> IRewardInventoryService
+    RewardRedemptionService ..|> IRewardRedemptionService
+}
+
+@enduml

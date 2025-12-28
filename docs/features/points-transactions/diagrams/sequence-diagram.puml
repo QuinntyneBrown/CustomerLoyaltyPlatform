@@ -1,0 +1,75 @@
+@startuml Points Earning Sequence
+
+skinparam sequenceArrowThickness 2
+skinparam sequenceParticipant underline
+
+title Points Earning from Purchase Flow
+
+actor "Staff" as Staff
+participant "Checkout UI" as UI
+participant "API Controller" as API
+participant "PurchaseService" as PurchaseSvc
+participant "PointsService" as PointsSvc
+participant "EarningRuleService" as RuleSvc
+participant "ICustomerLoyaltyPlatformContext" as DB
+participant "Event Publisher" as Events
+
+Staff -> UI: Enter purchase amount\nfor member
+activate UI
+
+UI -> API: POST /api/purchases\n{amount, memberId}
+activate API
+
+API -> PurchaseSvc: RecordPurchase(command)
+activate PurchaseSvc
+
+PurchaseSvc -> DB: Save Purchase
+activate DB
+DB --> PurchaseSvc: Saved
+deactivate DB
+
+PurchaseSvc -> Events: Publish(PurchaseRecorded)
+activate Events
+Events --> PurchaseSvc: Published
+deactivate Events
+
+PurchaseSvc -> PointsSvc: EarnPoints(memberId, purchaseId, amount)
+activate PointsSvc
+
+PointsSvc -> RuleSvc: CalculateEarnings(programId, amount)
+activate RuleSvc
+RuleSvc -> DB: Get active earning rules
+RuleSvc -> RuleSvc: Apply rules and tier bonus
+RuleSvc --> PointsSvc: pointsToAward = 150
+deactivate RuleSvc
+
+PointsSvc -> DB: Get member current balance
+activate DB
+DB --> PointsSvc: balance = 1100
+deactivate DB
+
+PointsSvc -> PointsSvc: Create PointsTransaction
+PointsSvc -> PointsSvc: Calculate expiration date
+
+PointsSvc -> DB: Save transaction\nUpdate member balance
+activate DB
+DB --> PointsSvc: Saved
+deactivate DB
+
+PointsSvc -> Events: Publish(PointsEarned)
+activate Events
+Events --> PointsSvc: Published
+deactivate Events
+
+PointsSvc --> PurchaseSvc: Points awarded: 150
+deactivate PointsSvc
+
+PurchaseSvc --> API: Purchase recorded\nPoints: 150
+deactivate PurchaseSvc
+
+API --> UI: 201 Created\n{purchaseId, pointsAwarded}
+deactivate API
+
+UI --> Staff: Show confirmation\n"Jane earned 150 Miles\nNew balance: 1,250"
+
+@enduml

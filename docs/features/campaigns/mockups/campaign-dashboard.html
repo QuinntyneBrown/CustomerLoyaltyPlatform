@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campaigns - Customer Loyalty Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; background-color: #fafafa; color: #333; }
+        .app-container { display: flex; min-height: 100vh; }
+        .sidebar { width: 240px; background-color: #3f51b5; color: white; padding: 16px 0; }
+        .sidebar-header { padding: 16px 24px; font-size: 20px; font-weight: 500; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 8px; }
+        .nav-item { display: flex; align-items: center; padding: 12px 24px; cursor: pointer; transition: background-color 0.2s; }
+        .nav-item:hover { background-color: rgba(255,255,255,0.1); }
+        .nav-item.active { background-color: rgba(255,255,255,0.2); }
+        .nav-item .material-icons { margin-right: 16px; }
+        .main-content { flex: 1; padding: 24px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .page-title { font-size: 24px; font-weight: 400; }
+        .btn-primary { display: flex; align-items: center; gap: 8px; padding: 10px 20px; background: #3f51b5; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; }
+        .tabs { display: flex; margin-bottom: 24px; background: white; border-radius: 8px; padding: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .tab { flex: 1; padding: 12px; text-align: center; border: none; background: transparent; cursor: pointer; border-radius: 6px; font-weight: 500; color: #666; }
+        .tab.active { background: #3f51b5; color: white; }
+        .tab .badge { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; border-radius: 10px; background: #ff5722; color: white; font-size: 12px; margin-left: 8px; }
+        .campaign-card { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 16px; overflow: hidden; }
+        .campaign-header { display: flex; align-items: center; padding: 20px; border-bottom: 1px solid #eee; }
+        .campaign-icon { width: 48px; height: 48px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 16px; }
+        .campaign-icon.double-points { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .campaign-icon.referral { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .campaign-icon.bonus { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .campaign-icon .material-icons { color: white; font-size: 24px; }
+        .campaign-info { flex: 1; }
+        .campaign-name { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
+        .campaign-dates { font-size: 14px; color: #666; }
+        .campaign-status { padding: 6px 12px; border-radius: 16px; font-size: 12px; font-weight: 500; }
+        .status-active { background: #e8f5e9; color: #2e7d32; }
+        .status-scheduled { background: #fff3e0; color: #e65100; }
+        .status-completed { background: #eceff1; color: #546e7a; }
+        .campaign-body { padding: 20px; }
+        .campaign-meta { display: flex; gap: 32px; margin-bottom: 16px; }
+        .meta-item { }
+        .meta-label { font-size: 12px; color: #666; margin-bottom: 4px; }
+        .meta-value { font-size: 16px; font-weight: 500; }
+        .campaign-stats { display: flex; gap: 24px; padding: 16px; background: #f8f9fa; border-radius: 8px; }
+        .stat-box { flex: 1; text-align: center; }
+        .stat-number { font-size: 24px; font-weight: 500; color: #3f51b5; }
+        .stat-label { font-size: 12px; color: #666; }
+        .campaign-actions { display: flex; justify-content: flex-end; gap: 8px; padding: 16px 20px; border-top: 1px solid #eee; }
+        .btn-view { padding: 8px 16px; border: 1px solid #3f51b5; background: white; color: #3f51b5; border-radius: 4px; cursor: pointer; font-weight: 500; }
+        .btn-stop { padding: 8px 16px; border: 1px solid #f44336; background: white; color: #f44336; border-radius: 4px; cursor: pointer; }
+        .progress-bar { height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden; margin-top: 16px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 4px; }
+        .progress-label { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">Mike's Auto Rewards</div>
+            <div class="nav-item"><span class="material-icons">dashboard</span>Dashboard</div>
+            <div class="nav-item"><span class="material-icons">people</span>Members</div>
+            <div class="nav-item"><span class="material-icons">stars</span>Points</div>
+            <div class="nav-item"><span class="material-icons">card_giftcard</span>Rewards</div>
+            <div class="nav-item active"><span class="material-icons">campaign</span>Campaigns</div>
+            <div class="nav-item"><span class="material-icons">analytics</span>Analytics</div>
+            <div class="nav-item"><span class="material-icons">settings</span>Settings</div>
+        </nav>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Campaigns & Promotions</h1>
+                <button class="btn-primary">
+                    <span class="material-icons">add</span>
+                    New Campaign
+                </button>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active">Active <span class="badge">2</span></button>
+                <button class="tab">Scheduled <span class="badge" style="background: #ff9800;">1</span></button>
+                <button class="tab">Completed</button>
+            </div>
+
+            <div class="campaign-card">
+                <div class="campaign-header">
+                    <div class="campaign-icon double-points">
+                        <span class="material-icons">local_fire_department</span>
+                    </div>
+                    <div class="campaign-info">
+                        <div class="campaign-name">Holiday Double Points</div>
+                        <div class="campaign-dates">Dec 20, 2025 - Dec 31, 2025</div>
+                    </div>
+                    <span class="campaign-status status-active">Active</span>
+                </div>
+                <div class="campaign-body">
+                    <div class="campaign-meta">
+                        <div class="meta-item">
+                            <div class="meta-label">Campaign Type</div>
+                            <div class="meta-value">Double Points</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Target Audience</div>
+                            <div class="meta-value">All Members</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Multiplier</div>
+                            <div class="meta-value">2x Points</div>
+                        </div>
+                    </div>
+                    <div class="campaign-stats">
+                        <div class="stat-box">
+                            <div class="stat-number">156</div>
+                            <div class="stat-label">Participants</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number">12,450</div>
+                            <div class="stat-label">Bonus Points Awarded</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number">$4,825</div>
+                            <div class="stat-label">Revenue Generated</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 73%;"></div>
+                    </div>
+                    <div class="progress-label">
+                        <span>8 days remaining</span>
+                        <span>73% complete</span>
+                    </div>
+                </div>
+                <div class="campaign-actions">
+                    <button class="btn-view">View Details</button>
+                    <button class="btn-stop">End Early</button>
+                </div>
+            </div>
+
+            <div class="campaign-card">
+                <div class="campaign-header">
+                    <div class="campaign-icon referral">
+                        <span class="material-icons">group_add</span>
+                    </div>
+                    <div class="campaign-info">
+                        <div class="campaign-name">Referral Rewards</div>
+                        <div class="campaign-dates">Ongoing • Started Jan 1, 2025</div>
+                    </div>
+                    <span class="campaign-status status-active">Active</span>
+                </div>
+                <div class="campaign-body">
+                    <div class="campaign-meta">
+                        <div class="meta-item">
+                            <div class="meta-label">Campaign Type</div>
+                            <div class="meta-value">Referral Program</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Referrer Bonus</div>
+                            <div class="meta-value">100 Miles</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">New Member Bonus</div>
+                            <div class="meta-value">50 Miles</div>
+                        </div>
+                    </div>
+                    <div class="campaign-stats">
+                        <div class="stat-box">
+                            <div class="stat-number">23</div>
+                            <div class="stat-label">Total Referrals</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number">18</div>
+                            <div class="stat-label">Converted</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number">2,700</div>
+                            <div class="stat-label">Points Awarded</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="campaign-actions">
+                    <button class="btn-view">View Details</button>
+                </div>
+            </div>
+
+            <div class="campaign-card" style="opacity: 0.8;">
+                <div class="campaign-header">
+                    <div class="campaign-icon bonus" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);">
+                        <span class="material-icons">celebration</span>
+                    </div>
+                    <div class="campaign-info">
+                        <div class="campaign-name">New Year Bonus</div>
+                        <div class="campaign-dates">Jan 1, 2026 - Jan 7, 2026</div>
+                    </div>
+                    <span class="campaign-status status-scheduled">Scheduled</span>
+                </div>
+                <div class="campaign-body">
+                    <div class="campaign-meta">
+                        <div class="meta-item">
+                            <div class="meta-label">Campaign Type</div>
+                            <div class="meta-value">Bonus Points</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Target Audience</div>
+                            <div class="meta-value">All Members</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Bonus Amount</div>
+                            <div class="meta-value">+50 Points per visit</div>
+                        </div>
+                    </div>
+                    <div style="text-align: center; padding: 24px; color: #666;">
+                        <span class="material-icons" style="font-size: 48px; color: #ff9800;">schedule</span>
+                        <p style="margin-top: 8px;">Campaign starts in 4 days</p>
+                    </div>
+                </div>
+                <div class="campaign-actions">
+                    <button class="btn-view">Edit</button>
+                    <button class="btn-stop">Cancel</button>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

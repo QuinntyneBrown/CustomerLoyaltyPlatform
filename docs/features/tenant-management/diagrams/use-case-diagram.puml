@@ -1,0 +1,104 @@
+@startuml Tenant Management Use Case Diagram
+
+skinparam actorStyle awesome
+skinparam usecase {
+    BackgroundColor White
+    BorderColor Black
+}
+
+left to right direction
+
+actor "Platform Admin" as PlatformAdmin
+actor "Tenant Owner" as TenantOwner
+actor "Tenant Admin" as TenantAdmin
+actor "System" as System
+
+rectangle "Tenant Management" {
+
+    usecase "Provision Tenant" as UC1
+    usecase "Activate Tenant" as UC2
+    usecase "Suspend Tenant" as UC3
+    usecase "Reactivate Tenant" as UC4
+    usecase "Delete Tenant" as UC5
+    usecase "Update Tenant Profile" as UC6
+    usecase "Configure Branding" as UC7
+    usecase "Update Settings" as UC8
+    usecase "Toggle Features" as UC9
+    usecase "View Limits & Usage" as UC10
+    usecase "Generate API Key" as UC11
+    usecase "Revoke API Key" as UC12
+    usecase "Request Data Export" as UC13
+    usecase "Download Data Export" as UC14
+    usecase "Transfer Ownership" as UC15
+    usecase "View Tenant Dashboard" as UC16
+
+    usecase "Validate DNS" as UC_DNS
+    usecase "Generate Export File" as UC_EXPORT
+    usecase "Send Notifications" as UC_NOTIFY
+    usecase "Purge Tenant Data" as UC_PURGE
+}
+
+' Platform Admin relationships
+PlatformAdmin --> UC1
+PlatformAdmin --> UC3
+PlatformAdmin --> UC4
+PlatformAdmin --> UC5
+PlatformAdmin --> UC9
+
+' Tenant Owner relationships
+TenantOwner --> UC2
+TenantOwner --> UC6
+TenantOwner --> UC7
+TenantOwner --> UC8
+TenantOwner --> UC9
+TenantOwner --> UC10
+TenantOwner --> UC11
+TenantOwner --> UC12
+TenantOwner --> UC13
+TenantOwner --> UC14
+TenantOwner --> UC15
+TenantOwner --> UC16
+
+' Tenant Admin relationships
+TenantAdmin --> UC6
+TenantAdmin --> UC7
+TenantAdmin --> UC8
+TenantAdmin --> UC10
+TenantAdmin --> UC11
+TenantAdmin --> UC12
+TenantAdmin --> UC13
+TenantAdmin --> UC14
+TenantAdmin --> UC16
+
+' System relationships
+System --> UC_DNS
+System --> UC_EXPORT
+System --> UC_NOTIFY
+System --> UC_PURGE
+
+' Includes and extends
+UC7 ..> UC_DNS : <<include>>
+UC13 ..> UC_EXPORT : <<include>>
+UC3 ..> UC_NOTIFY : <<include>>
+UC5 ..> UC_PURGE : <<include>>
+UC5 ..> UC_NOTIFY : <<include>>
+
+note right of UC1
+    Requires Platform Admin role.
+    Creates new tenant with
+    default configuration.
+end note
+
+note right of UC5
+    GDPR compliant deletion.
+    Purges all tenant data after
+    retention period.
+end note
+
+note right of UC13
+    Supports JSON, CSV, XML formats.
+    Async processing with
+    download link notification.
+end note
+
+@enduml

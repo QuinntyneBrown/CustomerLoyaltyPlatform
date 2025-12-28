@@ -1,0 +1,175 @@
+@startuml Loyalty Program Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor White
+    ArrowColor Black
+    BorderColor Black
+}
+
+package "Loyalty Program Domain" {
+
+    enum ProgramType {
+        PointsBased
+        PunchCard
+        Tiered
+        Cashback
+    }
+
+    enum EarningRuleType {
+        PerDollarSpent
+        PerVisit
+        PerItem
+        FixedAmount
+    }
+
+    enum RedemptionType {
+        Discount
+        FreeItem
+        Service
+        GiftCard
+        Experience
+    }
+
+    enum ExpirationBasis {
+        FromEarnDate
+        FromLastActivity
+        CalendarYear
+        Never
+    }
+
+    class LoyaltyProgram {
+        +ProgramId: Guid
+        +TenantId: Guid
+        +BusinessId: Guid
+        +ProgramName: string
+        +ProgramType: ProgramType
+        +PointsName: string
+        +IsActive: bool
+        +CreatedBy: Guid
+        +CreatedAt: DateTime
+        +UpdatedAt: DateTime
+        --
+        +Activate(): void
+        +Deactivate(): void
+        +UpdateName(name: string): void
+    }
+
+    class EarningRule {
+        +RuleId: Guid
+        +ProgramId: Guid
+        +TenantId: Guid
+        +RuleType: EarningRuleType
+        +PointsAmount: int
+        +SpendThreshold: decimal?
+        +ApplicableCategories: List<string>
+        +EffectiveFrom: DateTime
+        +EffectiveTo: DateTime?
+        +IsActive: bool
+        +ConfiguredBy: Guid
+        +ConfiguredAt: DateTime
+        --
+        +CalculatePoints(amount: decimal): int
+        +IsEffective(date: DateTime): bool
+        +Modify(config: RuleConfig): void
+        +Deactivate(): void
+    }
+
+    class RedemptionRule {
+        +RuleId: Guid
+        +ProgramId: Guid
+        +TenantId: Guid
+        +RedemptionType: RedemptionType
+        +PointsRequired: int
+        +RewardValue: decimal
+        +RewardDescription: string
+        +MinimumPurchase: decimal?
+        +IsActive: bool
+        +ConfiguredBy: Guid
+        +ConfiguredAt: DateTime
+        --
+        +CanRedeem(points: int, purchase: decimal): bool
+        +Modify(config: RuleConfig): void
+        +Deactivate(): void
+    }
+
+    class PointExpirationPolicy {
+        +PolicyId: Guid
+        +ProgramId: Guid
+        +TenantId: Guid
+        +ExpirationPeriodMonths: int?
+        +ExpirationBasis: ExpirationBasis
+        +WarningPeriodDays: int
+        +SetBy: Guid
+        +SetAt: DateTime
+        --
+        +CalculateExpirationDate(earnDate: DateTime): DateTime?
+        +ShouldWarn(expirationDate: DateTime): bool
+    }
+
+    class Tier {
+        +TierId: Guid
+        +ProgramId: Guid
+        +TenantId: Guid
+        +TierName: string
+        +PointsThreshold: int
+        +Benefits: List<string>
+        +EarningMultiplier: decimal
+        +SortOrder: int
+        --
+        +QualifiesFor(points: int): bool
+    }
+
+    class TierStructure {
+        +ProgramId: Guid
+        +Tiers: List<Tier>
+        --
+        +GetTierForPoints(points: int): Tier
+        +GetNextTier(currentTier: Tier): Tier?
+    }
+
+    LoyaltyProgram "1" *-- "many" EarningRule
+    LoyaltyProgram "1" *-- "many" RedemptionRule
+    LoyaltyProgram "1" *-- "1" PointExpirationPolicy
+    LoyaltyProgram "1" *-- "0..1" TierStructure
+    TierStructure "1" *-- "many" Tier
+}
+
+package "Loyalty Program Services" {
+
+    interface ILoyaltyProgramService {
+        +CreateProgram(command: CreateProgramCommand): Task<LoyaltyProgram>
+        +GetProgram(programId: Guid): Task<LoyaltyProgram>
+        +UpdateProgram(programId: Guid, updates: Dictionary): Task
+        +GetProgramsByBusiness(businessId: Guid): Task<List<LoyaltyProgram>>
+    }
+
+    interface IEarningRuleService {
+        +ConfigureRule(command: ConfigureRuleCommand): Task<EarningRule>
+        +ModifyRule(ruleId: Guid, changes: RuleConfig): Task
+        +DeactivateRule(ruleId: Guid): Task
+        +CalculateEarnings(programId: Guid, amount: decimal): Task<int>
+    }
+
+    interface IRedemptionRuleService {
+        +ConfigureRule(command: ConfigureRuleCommand): Task<RedemptionRule>
+        +ModifyRule(ruleId: Guid, changes: RuleConfig): Task
+        +DeactivateRule(ruleId: Guid): Task
+        +GetAvailableRedemptions(programId: Guid, points: int): Task<List<RedemptionRule>>
+    }
+
+    interface ITierService {
+        +ConfigureTiers(programId: Guid, tiers: List<TierConfig>): Task
+        +GetMemberTier(memberId: Guid): Task<Tier>
+        +EvaluateTierProgression(memberId: Guid): Task<TierChange?>
+    }
+
+    class LoyaltyProgramService {
+        -_context: ICustomerLoyaltyPlatformContext
+        -_eventPublisher: IEventPublisher
+    }
+
+    LoyaltyProgramService ..|> ILoyaltyProgramService
+}
+
+@enduml

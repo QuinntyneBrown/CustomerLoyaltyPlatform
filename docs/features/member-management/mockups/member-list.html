@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Management - Customer Loyalty Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; background-color: #fafafa; color: #333; }
+        .app-container { display: flex; min-height: 100vh; }
+        .sidebar { width: 240px; background-color: #3f51b5; color: white; padding: 16px 0; }
+        .sidebar-header { padding: 16px 24px; font-size: 20px; font-weight: 500; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 8px; }
+        .nav-item { display: flex; align-items: center; padding: 12px 24px; cursor: pointer; transition: background-color 0.2s; }
+        .nav-item:hover { background-color: rgba(255,255,255,0.1); }
+        .nav-item.active { background-color: rgba(255,255,255,0.2); }
+        .nav-item .material-icons { margin-right: 16px; }
+        .main-content { flex: 1; padding: 24px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .page-title { font-size: 24px; font-weight: 400; }
+        .btn-primary { display: flex; align-items: center; gap: 8px; padding: 10px 20px; background: #3f51b5; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; }
+        .btn-primary:hover { background: #303f9f; }
+        .toolbar { display: flex; gap: 16px; margin-bottom: 24px; background: white; padding: 16px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+        .search-box { flex: 1; display: flex; align-items: center; border: 1px solid #ddd; border-radius: 4px; padding: 8px 12px; }
+        .search-box input { flex: 1; border: none; outline: none; font-size: 14px; }
+        .search-box .material-icons { color: #666; }
+        .filter-select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; background: white; }
+        .tabs { display: flex; gap: 0; margin-bottom: 24px; }
+        .tab { padding: 12px 24px; border: none; background: white; cursor: pointer; font-size: 14px; border-bottom: 2px solid transparent; }
+        .tab.active { border-bottom-color: #3f51b5; color: #3f51b5; font-weight: 500; }
+        .member-table { width: 100%; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); overflow: hidden; }
+        .member-table th, .member-table td { padding: 16px; text-align: left; border-bottom: 1px solid #eee; }
+        .member-table th { background: #f5f5f5; font-weight: 500; font-size: 14px; color: #666; }
+        .member-row { cursor: pointer; transition: background 0.2s; }
+        .member-row:hover { background: #f5f5f5; }
+        .member-info { display: flex; align-items: center; gap: 12px; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: #3f51b5; display: flex; align-items: center; justify-content: center; color: white; font-weight: 500; }
+        .member-name { font-weight: 500; }
+        .member-email { font-size: 12px; color: #666; }
+        .tier-badge { padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 500; }
+        .tier-bronze { background: #fbe9e7; color: #bf360c; }
+        .tier-silver { background: #eceff1; color: #455a64; }
+        .tier-gold { background: #fff8e1; color: #ff8f00; }
+        .tier-platinum { background: #f3e5f5; color: #7b1fa2; }
+        .status-badge { padding: 4px 12px; border-radius: 16px; font-size: 12px; }
+        .status-active { background: #e8f5e9; color: #2e7d32; }
+        .status-inactive { background: #ffebee; color: #c62828; }
+        .points-value { font-weight: 500; color: #3f51b5; }
+        .action-menu { color: #666; cursor: pointer; }
+        .pagination { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: white; border-radius: 0 0 8px 8px; }
+        .pagination-info { color: #666; font-size: 14px; }
+        .pagination-buttons { display: flex; gap: 8px; }
+        .pagination-btn { padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer; }
+        .pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">Mike's Auto Rewards</div>
+            <div class="nav-item"><span class="material-icons">dashboard</span>Dashboard</div>
+            <div class="nav-item active"><span class="material-icons">people</span>Members</div>
+            <div class="nav-item"><span class="material-icons">stars</span>Points</div>
+            <div class="nav-item"><span class="material-icons">card_giftcard</span>Rewards</div>
+            <div class="nav-item"><span class="material-icons">campaign</span>Campaigns</div>
+            <div class="nav-item"><span class="material-icons">analytics</span>Analytics</div>
+            <div class="nav-item"><span class="material-icons">settings</span>Settings</div>
+        </nav>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Members</h1>
+                <button class="btn-primary">
+                    <span class="material-icons">person_add</span>
+                    Enroll Member
+                </button>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active">Active Members</button>
+                <button class="tab">Pending Invitations</button>
+                <button class="tab">Deactivated</button>
+            </div>
+
+            <div class="toolbar">
+                <div class="search-box">
+                    <span class="material-icons">search</span>
+                    <input type="text" placeholder="Search by name, email, or phone...">
+                </div>
+                <select class="filter-select">
+                    <option>All Tiers</option>
+                    <option>Bronze</option>
+                    <option>Silver</option>
+                    <option>Gold</option>
+                    <option>Platinum</option>
+                </select>
+                <select class="filter-select">
+                    <option>All Status</option>
+                    <option>Active</option>
+                    <option>At Risk</option>
+                </select>
+            </div>
+
+            <table class="member-table">
+                <thead>
+                    <tr>
+                        <th>Member</th>
+                        <th>Phone</th>
+                        <th>Tier</th>
+                        <th>Points Balance</th>
+                        <th>Status</th>
+                        <th>Last Activity</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="member-row">
+                        <td>
+                            <div class="member-info">
+                                <div class="avatar">JS</div>
+                                <div>
+                                    <div class="member-name">Jane Smith</div>
+                                    <div class="member-email">jane.smith@email.com</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>(555) 123-4567</td>
+                        <td><span class="tier-badge tier-gold">Gold</span></td>
+                        <td><span class="points-value">1,250 Miles</span></td>
+                        <td><span class="status-badge status-active">Active</span></td>
+                        <td>Dec 28, 2025</td>
+                        <td><span class="material-icons action-menu">more_vert</span></td>
+                    </tr>
+                    <tr class="member-row">
+                        <td>
+                            <div class="member-info">
+                                <div class="avatar">MJ</div>
+                                <div>
+                                    <div class="member-name">Michael Johnson</div>
+                                    <div class="member-email">m.johnson@email.com</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>(555) 234-5678</td>
+                        <td><span class="tier-badge tier-platinum">Platinum</span></td>
+                        <td><span class="points-value">3,450 Miles</span></td>
+                        <td><span class="status-badge status-active">Active</span></td>
+                        <td>Dec 27, 2025</td>
+                        <td><span class="material-icons action-menu">more_vert</span></td>
+                    </tr>
+                    <tr class="member-row">
+                        <td>
+                            <div class="member-info">
+                                <div class="avatar">SW</div>
+                                <div>
+                                    <div class="member-name">Sarah Williams</div>
+                                    <div class="member-email">sarah.w@email.com</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>(555) 345-6789</td>
+                        <td><span class="tier-badge tier-silver">Silver</span></td>
+                        <td><span class="points-value">780 Miles</span></td>
+                        <td><span class="status-badge status-active">Active</span></td>
+                        <td>Dec 25, 2025</td>
+                        <td><span class="material-icons action-menu">more_vert</span></td>
+                    </tr>
+                    <tr class="member-row">
+                        <td>
+                            <div class="member-info">
+                                <div class="avatar">RD</div>
+                                <div>
+                                    <div class="member-name">Robert Davis</div>
+                                    <div class="member-email">r.davis@email.com</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>(555) 456-7890</td>
+                        <td><span class="tier-badge tier-bronze">Bronze</span></td>
+                        <td><span class="points-value">150 Miles</span></td>
+                        <td><span class="status-badge status-inactive">At Risk</span></td>
+                        <td>Nov 23, 2025</td>
+                        <td><span class="material-icons action-menu">more_vert</span></td>
+                    </tr>
+                    <tr class="member-row">
+                        <td>
+                            <div class="member-info">
+                                <div class="avatar">EB</div>
+                                <div>
+                                    <div class="member-name">Emily Brown</div>
+                                    <div class="member-email">emily.b@email.com</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>(555) 567-8901</td>
+                        <td><span class="tier-badge tier-gold">Gold</span></td>
+                        <td><span class="points-value">1,890 Miles</span></td>
+                        <td><span class="status-badge status-active">Active</span></td>
+                        <td>Dec 26, 2025</td>
+                        <td><span class="material-icons action-menu">more_vert</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="pagination">
+                <div class="pagination-info">Showing 1-5 of 1,250 members</div>
+                <div class="pagination-buttons">
+                    <button class="pagination-btn" disabled>Previous</button>
+                    <button class="pagination-btn">Next</button>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

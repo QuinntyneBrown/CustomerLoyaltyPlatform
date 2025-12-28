@@ -1,0 +1,151 @@
+@startuml Member Management Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor White
+    ArrowColor Black
+    BorderColor Black
+}
+
+package "Member Management Domain" {
+
+    enum EnrollmentSource {
+        InStore
+        Website
+        Mobile
+        Referral
+    }
+
+    enum MemberStatus {
+        Active
+        Inactive
+        Deactivated
+    }
+
+    enum CardType {
+        Physical
+        Digital
+        Both
+    }
+
+    enum MarketingChannel {
+        Email
+        SMS
+        Push
+    }
+
+    class Member {
+        +MemberId: Guid
+        +TenantId: Guid
+        +ProgramId: Guid
+        +BusinessId: Guid
+        +FirstName: string
+        +LastName: string
+        +Email: string?
+        +Phone: string
+        +EnrollmentSource: EnrollmentSource
+        +ReferredByMemberId: Guid?
+        +EnrolledBy: Guid?
+        +Status: MemberStatus
+        +PointsBalance: int
+        +LifetimePoints: int
+        +CurrentTierId: Guid?
+        +EnrolledAt: DateTime
+        +LastActivityAt: DateTime?
+        --
+        +FullName(): string
+        +UpdateProfile(fields: Dictionary): void
+        +AddPoints(amount: int): void
+        +DeductPoints(amount: int): void
+        +Deactivate(reason: string): void
+        +Reactivate(restorePoints: bool): void
+    }
+
+    class MemberCard {
+        +CardId: Guid
+        +MemberId: Guid
+        +TenantId: Guid
+        +CardType: CardType
+        +CardNumber: string
+        +BarcodeData: string
+        +IsActive: bool
+        +IssuedBy: Guid
+        +IssuedAt: DateTime
+        +DeactivatedAt: DateTime?
+        --
+        +Deactivate(): void
+        +GenerateBarcode(): string
+    }
+
+    class MemberMarketingPreference {
+        +PreferenceId: Guid
+        +MemberId: Guid
+        +TenantId: Guid
+        +Channel: MarketingChannel
+        +IsOptedIn: bool
+        +UpdatedAt: DateTime
+        --
+        +OptIn(): void
+        +OptOut(): void
+    }
+
+    class MemberMerge {
+        +MergeId: Guid
+        +PrimaryMemberId: Guid
+        +SecondaryMemberId: Guid
+        +CombinedPointsBalance: int
+        +MergedBy: Guid
+        +MergedAt: DateTime
+    }
+
+    Member "1" *-- "many" MemberCard
+    Member "1" *-- "many" MemberMarketingPreference
+    Member "1" -- "0..1" Member : referredBy
+}
+
+package "Member Management Services" {
+
+    interface IMemberService {
+        +EnrollMember(command: EnrollMemberCommand): Task<Member>
+        +GetMember(memberId: Guid): Task<Member>
+        +UpdateProfile(memberId: Guid, fields: Dictionary): Task
+        +SearchMembers(query: MemberSearchQuery): Task<PagedResult<Member>>
+        +GetMemberByPhone(phone: string): Task<Member?>
+        +GetMemberByCard(cardNumber: string): Task<Member?>
+    }
+
+    interface IMemberCardService {
+        +IssueCard(memberId: Guid, cardType: CardType): Task<MemberCard>
+        +ReplaceCard(cardId: Guid, reason: string): Task<MemberCard>
+        +GetActiveCard(memberId: Guid): Task<MemberCard?>
+        +ValidateCard(cardNumber: string): Task<MemberCard?>
+    }
+
+    interface IMemberLifecycleService {
+        +DeactivateMember(memberId: Guid, reason: string): Task
+        +ReactivateMember(memberId: Guid, restorePoints: bool): Task
+        +MergeMembers(primaryId: Guid, secondaryId: Guid): Task<Member>
+    }
+
+    interface IMemberPreferencesService {
+        +GetPreferences(memberId: Guid): Task<List<MemberMarketingPreference>>
+        +UpdatePreferences(memberId: Guid, preferences: List<PreferenceUpdate>): Task
+        +CanSendMarketing(memberId: Guid, channel: MarketingChannel): Task<bool>
+    }
+
+    class MemberService {
+        -_context: ICustomerLoyaltyPlatformContext
+        -_eventPublisher: IEventPublisher
+    }
+
+    class MemberCardService {
+        -_context: ICustomerLoyaltyPlatformContext
+        -_eventPublisher: IEventPublisher
+        -_barcodeGenerator: IBarcodeGenerator
+    }
+
+    MemberService ..|> IMemberService
+    MemberCardService ..|> IMemberCardService
+}
+
+@enduml

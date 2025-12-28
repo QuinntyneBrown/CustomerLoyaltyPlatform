@@ -1,0 +1,203 @@
+@startuml Tenant Management Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor White
+    ArrowColor Black
+    BorderColor Black
+}
+
+package "Tenant Management Domain" {
+
+    enum TenantStatus {
+        Pending
+        Active
+        Suspended
+        Deleted
+    }
+
+    enum PlanType {
+        Free
+        Starter
+        Professional
+        Enterprise
+    }
+
+    enum IsolationLevel {
+        Shared
+        Dedicated
+    }
+
+    enum SuspensionReason {
+        PaymentFailure
+        PolicyViolation
+        SecurityConcern
+        AdminRequest
+    }
+
+    enum ExportFormat {
+        JSON
+        CSV
+        XML
+    }
+
+    class Tenant {
+        +TenantId: Guid
+        +TenantName: string
+        +TenantSlug: string
+        +PrimaryContactEmail: string
+        +PrimaryContactName: string
+        +PlanType: PlanType
+        +DataRegion: string
+        +IsolationLevel: IsolationLevel
+        +Status: TenantStatus
+        +ProvisionedAt: DateTime
+        +ActivatedAt: DateTime?
+        +CreatedAt: DateTime
+        +UpdatedAt: DateTime
+        --
+        +Activate(activatedBy: Guid): void
+        +Suspend(reason: SuspensionReason, suspendedBy: Guid): void
+        +Reactivate(reactivatedBy: Guid, reason: string): void
+        +Delete(deletedBy: Guid, reason: string): void
+    }
+
+    class TenantSettings {
+        +TenantSettingsId: Guid
+        +TenantId: Guid
+        +SettingKey: string
+        +SettingValue: string
+        +UpdatedAt: DateTime
+        +UpdatedBy: Guid
+        --
+        +Update(value: string, updatedBy: Guid): void
+    }
+
+    class TenantBranding {
+        +TenantBrandingId: Guid
+        +TenantId: Guid
+        +LogoUrl: string?
+        +PrimaryColor: string?
+        +SecondaryColor: string?
+        +CustomDomain: string?
+        +ConfiguredAt: DateTime
+        --
+        +Configure(logoUrl: string, primaryColor: string, secondaryColor: string): void
+        +SetCustomDomain(domain: string): void
+    }
+
+    class TenantFeature {
+        +TenantFeatureId: Guid
+        +TenantId: Guid
+        +FeatureName: string
+        +Enabled: bool
+        +ToggledBy: Guid
+        +ToggledAt: DateTime
+        --
+        +Toggle(enabled: bool, toggledBy: Guid): void
+    }
+
+    class TenantLimit {
+        +TenantLimitId: Guid
+        +TenantId: Guid
+        +LimitType: string
+        +LimitValue: int
+        +UpdatedAt: DateTime
+        --
+        +Update(newLimit: int, reason: string): void
+    }
+
+    class TenantApiKey {
+        +TenantApiKeyId: Guid
+        +TenantId: Guid
+        +KeyName: string
+        +KeyHash: string
+        +Permissions: List<string>
+        +ExpiresAt: DateTime?
+        +GeneratedBy: Guid
+        +GeneratedAt: DateTime
+        +RevokedAt: DateTime?
+        +RevokedBy: Guid?
+        --
+        +Revoke(revokedBy: Guid, reason: string): void
+        +IsExpired(): bool
+        +IsRevoked(): bool
+    }
+
+    class TenantDataExport {
+        +ExportRequestId: Guid
+        +TenantId: Guid
+        +RequestedBy: Guid
+        +ExportFormat: ExportFormat
+        +Status: string
+        +DownloadUrl: string?
+        +ExpiresAt: DateTime?
+        +RequestedAt: DateTime
+        +CompletedAt: DateTime?
+        --
+        +Complete(downloadUrl: string, expiresAt: DateTime): void
+    }
+
+    Tenant "1" *-- "many" TenantSettings
+    Tenant "1" *-- "1" TenantBranding
+    Tenant "1" *-- "many" TenantFeature
+    Tenant "1" *-- "many" TenantLimit
+    Tenant "1" *-- "many" TenantApiKey
+    Tenant "1" *-- "many" TenantDataExport
+}
+
+package "Tenant Management Services" {
+
+    interface ITenantService {
+        +ProvisionTenant(command: ProvisionTenantCommand): Task<Tenant>
+        +ActivateTenant(tenantId: Guid, activatedBy: Guid): Task
+        +SuspendTenant(tenantId: Guid, reason: SuspensionReason, suspendedBy: Guid): Task
+        +ReactivateTenant(tenantId: Guid, reactivatedBy: Guid, reason: string): Task
+        +DeleteTenant(tenantId: Guid, deletedBy: Guid, reason: string): Task
+        +GetTenant(tenantId: Guid): Task<Tenant>
+    }
+
+    interface ITenantSettingsService {
+        +GetSettings(tenantId: Guid): Task<List<TenantSettings>>
+        +UpdateSettings(tenantId: Guid, settings: Dictionary<string, string>, updatedBy: Guid): Task
+    }
+
+    interface ITenantBrandingService {
+        +GetBranding(tenantId: Guid): Task<TenantBranding>
+        +ConfigureBranding(tenantId: Guid, command: ConfigureBrandingCommand): Task
+    }
+
+    interface ITenantApiKeyService {
+        +GenerateApiKey(tenantId: Guid, command: GenerateApiKeyCommand): Task<string>
+        +RevokeApiKey(tenantId: Guid, keyId: Guid, reason: string, revokedBy: Guid): Task
+        +ValidateApiKey(apiKey: string): Task<TenantApiKey?>
+    }
+
+    class TenantService {
+        -_context: ICustomerLoyaltyPlatformContext
+        -_eventPublisher: IEventPublisher
+    }
+
+    class TenantSettingsService {
+        -_context: ICustomerLoyaltyPlatformContext
+        -_eventPublisher: IEventPublisher
+    }
+
+    class TenantBrandingService {
+        -_context: ICustomerLoyaltyPlatformContext
+        -_eventPublisher: IEventPublisher
+    }
+
+    class TenantApiKeyService {
+        -_context: ICustomerLoyaltyPlatformContext
+        -_eventPublisher: IEventPublisher
+        -_keyHasher: IKeyHasher
+    }
+
+    TenantService ..|> ITenantService
+    TenantSettingsService ..|> ITenantSettingsService
+    TenantBrandingService ..|> ITenantBrandingService
+    TenantApiKeyService ..|> ITenantApiKeyService
+}
+
+@enduml

@@ -1,0 +1,79 @@
+@startuml Reward Redemption Sequence
+
+skinparam sequenceArrowThickness 2
+skinparam sequenceParticipant underline
+
+title Reward Redemption Flow
+
+actor "Member" as Member
+participant "Rewards Catalog" as UI
+participant "API Controller" as API
+participant "RewardRedemptionService" as RedemptionSvc
+participant "PointsService" as PointsSvc
+participant "RewardService" as RewardSvc
+participant "ICustomerLoyaltyPlatformContext" as DB
+participant "Event Publisher" as Events
+
+Member -> UI: Browse rewards catalog
+activate UI
+
+UI -> API: GET /api/rewards/available?memberId={id}
+activate API
+API --> UI: Available rewards list
+deactivate API
+
+UI --> Member: Display rewards with\naffordability indicators
+
+Member -> UI: Select reward to redeem
+UI --> Member: Show redemption confirmation
+
+Member -> UI: Confirm redemption
+UI -> API: POST /api/rewards/{rewardId}/redeem\n{memberId}
+activate API
+
+API -> RedemptionSvc: RedeemReward(memberId, rewardId)
+activate RedemptionSvc
+
+RedemptionSvc -> RewardSvc: GetReward(rewardId)
+activate RewardSvc
+RewardSvc --> RedemptionSvc: Reward details
+deactivate RewardSvc
+
+RedemptionSvc -> RedemptionSvc: Validate reward available
+
+RedemptionSvc -> PointsSvc: GetBalance(memberId)
+activate PointsSvc
+PointsSvc --> RedemptionSvc: balance = 1250
+deactivate PointsSvc
+
+RedemptionSvc -> RedemptionSvc: Validate sufficient points
+
+RedemptionSvc -> PointsSvc: RedeemPoints(memberId, pointsCost)
+activate PointsSvc
+PointsSvc -> DB: Create PointsTransaction\nUpdate member balance
+PointsSvc -> Events: Publish(PointsRedeemed)
+PointsSvc --> RedemptionSvc: Points deducted
+deactivate PointsSvc
+
+RedemptionSvc -> RewardSvc: DecrementInventory(rewardId)
+activate RewardSvc
+RewardSvc -> DB: Update inventory
+RewardSvc --> RedemptionSvc: Inventory updated
+deactivate RewardSvc
+
+RedemptionSvc -> RedemptionSvc: Generate redemption code
+
+RedemptionSvc -> DB: Save RewardRedemption
+activate DB
+DB --> RedemptionSvc: Saved
+deactivate DB
+
+RedemptionSvc --> API: RewardRedemption
+deactivate RedemptionSvc
+
+API --> UI: 201 Created\n{redemptionCode, expiresAt}
+deactivate API
+
+UI --> Member: Display voucher with\nredemption code and QR
+
+@enduml

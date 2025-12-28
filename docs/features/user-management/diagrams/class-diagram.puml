@@ -1,0 +1,136 @@
+@startuml User Management Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor White
+    ArrowColor Black
+    BorderColor Black
+}
+
+package "User Management Domain" {
+
+    enum TenantRole {
+        Owner
+        Admin
+        Manager
+        Staff
+    }
+
+    enum InvitationStatus {
+        Pending
+        Accepted
+        Expired
+        Cancelled
+    }
+
+    class User {
+        +UserId: Guid
+        +Email: string
+        +DisplayName: string
+        +PasswordHash: string
+        +IsActive: bool
+        +CreatedAt: DateTime
+        +UpdatedAt: DateTime
+        --
+        +UpdateProfile(name: string): void
+    }
+
+    class TenantUser {
+        +TenantUserId: Guid
+        +TenantId: Guid
+        +UserId: Guid
+        +Role: TenantRole
+        +JoinedAt: DateTime
+        +InvitationId: Guid
+        +IsActive: bool
+        +CreatedAt: DateTime
+        +UpdatedAt: DateTime
+        --
+        +ChangeRole(newRole: TenantRole, changedBy: Guid): void
+        +Deactivate(): void
+        +Reactivate(): void
+    }
+
+    class TenantInvitation {
+        +InvitationId: Guid
+        +TenantId: Guid
+        +Email: string
+        +Role: TenantRole
+        +InvitedBy: Guid
+        +TokenHash: string
+        +ExpiresAt: DateTime
+        +AcceptedAt: DateTime?
+        +InvitedAt: DateTime
+        +Status: InvitationStatus
+        --
+        +Accept(userId: Guid): void
+        +Cancel(): void
+        +IsExpired(): bool
+        +Resend(): void
+    }
+
+    class TenantUserPermission {
+        +TenantUserPermissionId: Guid
+        +TenantUserId: Guid
+        +PermissionName: string
+        +IsGranted: bool
+        +GrantedBy: Guid
+        +GrantedAt: DateTime
+    }
+
+    class RolePermission {
+        +RolePermissionId: Guid
+        +Role: TenantRole
+        +PermissionName: string
+        +IsDefault: bool
+    }
+
+    User "1" -- "many" TenantUser : belongs to tenants
+    TenantUser "1" *-- "many" TenantUserPermission : custom permissions
+    TenantUser "1" -- "1" TenantInvitation : created from
+    TenantRole "1" -- "many" RolePermission : default permissions
+}
+
+package "User Management Services" {
+
+    interface ITenantUserService {
+        +InviteUser(command: InviteUserCommand): Task<TenantInvitation>
+        +AcceptInvitation(token: string, userId: Guid): Task<TenantUser>
+        +ChangeRole(tenantId: Guid, userId: Guid, newRole: TenantRole, changedBy: Guid): Task
+        +RemoveUser(tenantId: Guid, userId: Guid, removedBy: Guid): Task
+        +GetTenantUsers(tenantId: Guid): Task<List<TenantUser>>
+    }
+
+    interface ITenantPermissionService {
+        +GetPermissions(tenantUserId: Guid): Task<List<string>>
+        +UpdatePermissions(tenantUserId: Guid, permissions: List<PermissionUpdate>): Task
+        +HasPermission(tenantUserId: Guid, permission: string): Task<bool>
+    }
+
+    interface ITenantOwnershipService {
+        +TransferOwnership(tenantId: Guid, newOwnerId: Guid, currentOwnerId: Guid): Task
+        +GetOwner(tenantId: Guid): Task<TenantUser>
+    }
+
+    class TenantUserService {
+        -_context: ICustomerLoyaltyPlatformContext
+        -_eventPublisher: IEventPublisher
+        -_emailService: IEmailService
+    }
+
+    class TenantPermissionService {
+        -_context: ICustomerLoyaltyPlatformContext
+        -_cache: IDistributedCache
+    }
+
+    class TenantOwnershipService {
+        -_context: ICustomerLoyaltyPlatformContext
+        -_eventPublisher: IEventPublisher
+    }
+
+    TenantUserService ..|> ITenantUserService
+    TenantPermissionService ..|> ITenantPermissionService
+    TenantOwnershipService ..|> ITenantOwnershipService
+}
+
+@enduml

@@ -1,0 +1,77 @@
+@startuml Member Enrollment Sequence
+
+skinparam sequenceArrowThickness 2
+skinparam sequenceParticipant underline
+
+title Member Enrollment Flow
+
+actor "Staff" as Staff
+participant "Enrollment Form" as UI
+participant "API Controller" as API
+participant "MemberService" as MemberSvc
+participant "MemberCardService" as CardSvc
+participant "ICustomerLoyaltyPlatformContext" as DB
+participant "Event Publisher" as Events
+participant "Email Service" as Email
+
+Staff -> UI: Open enrollment form
+activate UI
+
+Staff -> UI: Enter phone number
+UI -> API: GET /api/members/by-phone/{phone}
+activate API
+API --> UI: No existing member
+deactivate API
+
+Staff -> UI: Enter member details\n(name, email)
+
+Staff -> UI: Submit enrollment
+UI -> API: POST /api/members\n{memberDetails}
+activate API
+
+API -> MemberSvc: EnrollMember(command)
+activate MemberSvc
+
+MemberSvc -> MemberSvc: Generate MemberId
+MemberSvc -> MemberSvc: Create Member entity
+MemberSvc -> MemberSvc: Set initial points\n(welcome bonus)
+
+MemberSvc -> DB: SaveChangesAsync()
+activate DB
+DB --> MemberSvc: Saved
+deactivate DB
+
+MemberSvc -> Events: Publish(MemberEnrolled)
+activate Events
+Events --> MemberSvc: Published
+deactivate Events
+
+MemberSvc --> API: Member created
+deactivate MemberSvc
+
+API -> CardSvc: IssueCard(memberId, Digital)
+activate CardSvc
+
+CardSvc -> CardSvc: Generate card number
+CardSvc -> CardSvc: Generate barcode
+
+CardSvc -> DB: Save MemberCard
+activate DB
+DB --> CardSvc: Saved
+deactivate DB
+
+CardSvc -> Events: Publish(MemberCardIssued)
+CardSvc --> API: Card issued
+deactivate CardSvc
+
+API -> Email: SendWelcomeEmail(member)
+activate Email
+Email --> API: Queued
+deactivate Email
+
+API --> UI: 201 Created\n{member, card}
+deactivate API
+
+UI --> Staff: Show welcome screen\nwith digital card
+
+@enduml
