@@ -2,6 +2,7 @@ using CustomerLoyaltyPlatform.Api;
 using CustomerLoyaltyPlatform.Core;
 using CustomerLoyaltyPlatform.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -39,15 +40,25 @@ try
         cfg.RegisterServicesFromAssemblyContaining<Program>());
 
     var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
-    builder.Services.AddCors(options =>
-    {
-        options.AddDefaultPolicy(policy =>
+
+    builder.Services.AddCors(options => options.AddPolicy(
+        "CorsPolicy",
+        builder =>
         {
-            policy.WithOrigins(corsOrigins)
-                .AllowAnyHeader()
-                .AllowAnyMethod();
-        });
-    });
+            if (corsOrigins.Length > 0)
+            {
+                builder.WithOrigins(corsOrigins)
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials();
+            }
+            else
+            {
+                builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            }
+        }));
 
     var app = builder.Build();
 
@@ -72,7 +83,7 @@ try
     }
 
     app.UseHttpsRedirection();
-    app.UseCors();
+    app.UseCors("CorsPolicy");
     app.UseAuthorization();
     app.MapControllers();
 
@@ -89,6 +100,9 @@ finally
 
 namespace CustomerLoyaltyPlatform.Api
 {
+    /// <summary>
+    /// Program class.
+    /// </summary>
     public partial class Program
     {
     }
