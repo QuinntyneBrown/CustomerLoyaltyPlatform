@@ -1,0 +1,97 @@
+<div class="tenant-create-container">
+  <div class="header">
+    <button mat-icon-button (click)="goBack()" aria-label="Go back">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>Create Tenant</h1>
+  </div>
+
+  <ng-container *ngIf="vm$ | async as vm">
+    <mat-card>
+      <mat-card-content>
+        <div *ngIf="vm.error" class="error-banner">
+          {{ vm.error }}
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Tenant Name</mat-label>
+              <input matInput formControlName="tenantName" (blur)="generateSlug()">
+              <mat-error *ngIf="form.get('tenantName')?.hasError('required')">
+                Tenant name is required
+              </mat-error>
+              <mat-error *ngIf="form.get('tenantName')?.hasError('maxlength')">
+                Maximum 200 characters
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Tenant Slug</mat-label>
+              <input matInput formControlName="tenantSlug">
+              <mat-hint>Unique identifier (lowercase letters, numbers, hyphens)</mat-hint>
+              <mat-error *ngIf="form.get('tenantSlug')?.hasError('required')">
+                Tenant slug is required
+              </mat-error>
+              <mat-error *ngIf="form.get('tenantSlug')?.hasError('maxlength')">
+                Maximum 50 characters
+              </mat-error>
+              <mat-error *ngIf="form.get('tenantSlug')?.hasError('pattern')">
+                Only lowercase letters, numbers, and hyphens allowed
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Primary Contact Name</mat-label>
+              <input matInput formControlName="primaryContactName">
+              <mat-error *ngIf="form.get('primaryContactName')?.hasError('required')">
+                Contact name is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Primary Contact Email</mat-label>
+              <input matInput type="email" formControlName="primaryContactEmail">
+              <mat-error *ngIf="form.get('primaryContactEmail')?.hasError('required')">
+                Email is required
+              </mat-error>
+              <mat-error *ngIf="form.get('primaryContactEmail')?.hasError('email')">
+                Please enter a valid email
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Plan Type</mat-label>
+              <mat-select formControlName="planType">
+                <mat-option *ngFor="let plan of planTypes" [value]="plan">
+                  {{ plan }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Data Region</mat-label>
+              <mat-select formControlName="dataRegion">
+                <mat-option *ngFor="let region of dataRegions" [value]="region">
+                  {{ region }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="form-actions">
+            <button mat-button type="button" (click)="goBack()">Cancel</button>
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="vm.submitting">
+              <mat-spinner *ngIf="vm.submitting" diameter="20"></mat-spinner>
+              <span *ngIf="!vm.submitting">Create Tenant</span>
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </ng-container>
+</div>
