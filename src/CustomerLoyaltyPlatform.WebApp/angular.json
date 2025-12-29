@@ -6,31 +6,31 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "custom-loyalty-program-admin": {
+    "custom-loyalty-platform-admin": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
           "style": "scss"
         }
       },
-      "root": "projects/custom-loyalty-program-admin",
-      "sourceRoot": "projects/custom-loyalty-program-admin/src",
+      "root": "projects/custom-loyalty-platform-admin",
+      "sourceRoot": "projects/custom-loyalty-platform-admin/src",
       "prefix": "app",
       "architect": {
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "browser": "projects/custom-loyalty-program-admin/src/main.ts",
-            "tsConfig": "projects/custom-loyalty-program-admin/tsconfig.app.json",
+            "browser": "projects/custom-loyalty-platform-admin/src/main.ts",
+            "tsConfig": "projects/custom-loyalty-platform-admin/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
               {
                 "glob": "**/*",
-                "input": "projects/custom-loyalty-program-admin/public"
+                "input": "projects/custom-loyalty-platform-admin/public"
               }
             ],
             "styles": [
-              "projects/custom-loyalty-program-admin/src/styles.scss"
+              "projects/custom-loyalty-platform-admin/src/styles.scss"
             ]
           },
           "configurations": {
@@ -61,10 +61,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "custom-loyalty-program-admin:build:production"
+              "buildTarget": "custom-loyalty-platform-admin:build:production"
             },
             "development": {
-              "buildTarget": "custom-loyalty-program-admin:build:development"
+              "buildTarget": "custom-loyalty-platform-admin:build:development"
             }
           },
           "defaultConfiguration": "development"
