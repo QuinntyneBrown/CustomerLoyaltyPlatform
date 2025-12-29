@@ -8,6 +8,8 @@ public interface ICustomerLoyaltyPlatformContext
 
     DbSet<TenantUser> TenantUsers { get; }
 
+    DbSet<TenantInvitation> TenantInvitations { get; }
+
     DbSet<Business> Businesses { get; }
 
     DbSet<Member> Members { get; }
