@@ -1,0 +1,104 @@
+<div class="member-enroll-container">
+  <ng-container *ngIf="vm$ | async as vm">
+    <div class="header">
+      <button mat-icon-button (click)="goBack()" aria-label="Go back">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>Enroll Member</h1>
+    </div>
+
+    <div *ngIf="vm.loading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <mat-card *ngIf="!vm.loading">
+      <mat-card-content>
+        <div *ngIf="vm.error" class="error-banner">
+          {{ vm.error }}
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <h3>Personal Information</h3>
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>First Name</mat-label>
+              <input matInput formControlName="firstName">
+              <mat-error *ngIf="form.get('firstName')?.hasError('required')">
+                First name is required
+              </mat-error>
+              <mat-error *ngIf="form.get('firstName')?.hasError('maxlength')">
+                Maximum 100 characters
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Last Name</mat-label>
+              <input matInput formControlName="lastName">
+              <mat-error *ngIf="form.get('lastName')?.hasError('required')">
+                Last name is required
+              </mat-error>
+              <mat-error *ngIf="form.get('lastName')?.hasError('maxlength')">
+                Maximum 100 characters
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Email (optional)</mat-label>
+              <input matInput type="email" formControlName="email">
+              <mat-error *ngIf="form.get('email')?.hasError('email')">
+                Please enter a valid email
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Phone</mat-label>
+              <input matInput formControlName="phone">
+              <mat-error *ngIf="form.get('phone')?.hasError('required')">
+                Phone is required
+              </mat-error>
+              <mat-error *ngIf="form.get('phone')?.hasError('pattern')">
+                Please enter a valid phone number
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <h3>Enrollment Details</h3>
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Business</mat-label>
+              <mat-select formControlName="businessId">
+                <mat-option *ngFor="let business of vm.businesses" [value]="business.businessId">
+                  {{ business.businessName }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="form.get('businessId')?.hasError('required')">
+                Business is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Enrollment Source</mat-label>
+              <mat-select formControlName="enrollmentSource">
+                <mat-option *ngFor="let source of enrollmentSources" [value]="source">
+                  {{ source }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="form-actions">
+            <button mat-button type="button" (click)="goBack()">Cancel</button>
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="vm.submitting">
+              <mat-spinner *ngIf="vm.submitting" diameter="20"></mat-spinner>
+              <span *ngIf="!vm.submitting">Enroll Member</span>
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </ng-container>
+</div>

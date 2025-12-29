@@ -1,0 +1,81 @@
+<div class="program-list-container">
+  <ng-container *ngIf="vm$ | async as vm">
+    <div class="header">
+      <div class="header__left">
+        <a mat-icon-button [routerLink]="['/tenants', vm.tenantId]" aria-label="Go back">
+          <mat-icon>arrow_back</mat-icon>
+        </a>
+        <h1>Loyalty Programs</h1>
+      </div>
+      <a mat-raised-button color="primary" [routerLink]="['/tenants', vm.tenantId, 'programs', 'create']">
+        <mat-icon>add</mat-icon>
+        Create Program
+      </a>
+    </div>
+
+    <div *ngIf="vm.loading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <div *ngIf="vm.error" class="error-container">
+      <mat-card>
+        <mat-card-content>
+          <p class="error-message">{{ vm.error }}</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <mat-card *ngIf="!vm.loading && !vm.error">
+      <mat-card-content>
+        <table mat-table [dataSource]="vm.programs" class="program-table">
+          <ng-container matColumnDef="programName">
+            <th mat-header-cell *matHeaderCellDef>Program Name</th>
+            <td mat-cell *matCellDef="let program">{{ program.programName }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="programType">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let program">{{ program.programType }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="pointsName">
+            <th mat-header-cell *matHeaderCellDef>Points Name</th>
+            <td mat-cell *matCellDef="let program">{{ program.pointsName }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="isActive">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let program">
+              <mat-chip [color]="getStatusColor(program.isActive)" selected>
+                {{ program.isActive ? 'Active' : 'Inactive' }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef>Created</th>
+            <td mat-cell *matCellDef="let program">{{ program.createdAt | date:'shortDate' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let program">
+              <a mat-icon-button [routerLink]="['/tenants', vm.tenantId, 'programs', program.programId]" aria-label="View program">
+                <mat-icon>visibility</mat-icon>
+              </a>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell no-data" [attr.colspan]="displayedColumns.length">
+              No programs found. Create your first loyalty program to get started.
+            </td>
+          </tr>
+        </table>
+      </mat-card-content>
+    </mat-card>
+  </ng-container>
+</div>

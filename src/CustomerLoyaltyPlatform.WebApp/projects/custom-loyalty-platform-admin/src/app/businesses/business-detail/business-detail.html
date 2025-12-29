@@ -1,0 +1,106 @@
+<div class="business-detail-container">
+  <ng-container *ngIf="vm$ | async as vm">
+    <div class="header">
+      <button mat-icon-button (click)="goBack(vm.tenantId)" aria-label="Go back">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>Business Details</h1>
+    </div>
+
+    <div *ngIf="vm.loading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <div *ngIf="vm.error" class="error-container">
+      <mat-card>
+        <mat-card-content>
+          <p class="error-message">{{ vm.error }}</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <mat-card *ngIf="!vm.loading && !vm.error && vm.business">
+      <mat-card-header>
+        <mat-card-title>{{ vm.business.businessName }}</mat-card-title>
+        <mat-card-subtitle>
+          <mat-chip [color]="getStatusColor(vm.business.status)" selected>
+            {{ vm.business.status }}
+          </mat-chip>
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="detail-section">
+          <h3>Business Information</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Owner Name</label>
+              <span>{{ vm.business.ownerName }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Business Type</label>
+              <span>{{ vm.business.businessType }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Email</label>
+              <span>{{ vm.business.email }}</span>
+              <mat-icon *ngIf="vm.business.isEmailVerified" class="verified-icon">verified</mat-icon>
+            </div>
+            <div class="detail-item">
+              <label>Phone</label>
+              <span>{{ vm.business.phone }}</span>
+              <mat-icon *ngIf="vm.business.isPhoneVerified" class="verified-icon">verified</mat-icon>
+            </div>
+            <div class="detail-item">
+              <label>Registered</label>
+              <span>{{ vm.business.registeredAt | date:'medium' }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Identity Verified</label>
+              <span>{{ vm.business.isIdentityVerified ? 'Yes' : 'No' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="detail-section">
+          <h3>Address</h3>
+          <div class="detail-grid">
+            <div class="detail-item full-width">
+              <label>Street</label>
+              <span>{{ vm.business.address.street }}</span>
+            </div>
+            <div class="detail-item">
+              <label>City</label>
+              <span>{{ vm.business.address.city }}</span>
+            </div>
+            <div class="detail-item">
+              <label>State</label>
+              <span>{{ vm.business.address.state }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Postal Code</label>
+              <span>{{ vm.business.address.postalCode }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Country</label>
+              <span>{{ vm.business.address.country }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions align="end">
+        <a mat-button [routerLink]="['/tenants', vm.tenantId, 'businesses', vm.business.businessId, 'edit']">
+          <mat-icon>edit</mat-icon>
+          Edit Business
+        </a>
+        <a mat-raised-button color="primary" [routerLink]="['/tenants', vm.tenantId, 'businesses', vm.business.businessId, 'programs']">
+          <mat-icon>loyalty</mat-icon>
+          View Programs
+        </a>
+      </mat-card-actions>
+    </mat-card>
+  </ng-container>
+</div>

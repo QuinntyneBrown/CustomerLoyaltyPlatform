@@ -84,5 +84,27 @@
         </button>
       </mat-card-actions>
     </mat-card>
+
+    <div class="quick-links" *ngIf="!vm.loading && !vm.error && vm.tenant">
+      <h2>Manage</h2>
+      <div class="link-grid">
+        <a mat-raised-button [routerLink]="['/tenants', vm.tenant.tenantId, 'businesses']">
+          <mat-icon>store</mat-icon>
+          Businesses
+        </a>
+        <a mat-raised-button [routerLink]="['/tenants', vm.tenant.tenantId, 'members']">
+          <mat-icon>people</mat-icon>
+          Members
+        </a>
+        <a mat-raised-button [routerLink]="['/tenants', vm.tenant.tenantId, 'programs']">
+          <mat-icon>loyalty</mat-icon>
+          Loyalty Programs
+        </a>
+        <a mat-raised-button [routerLink]="['/tenants', vm.tenant.tenantId, 'users']">
+          <mat-icon>manage_accounts</mat-icon>
+          Users
+        </a>
+      </div>
+    </div>
   </ng-container>
 </div>
