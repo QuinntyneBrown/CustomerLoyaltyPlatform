@@ -1,0 +1,93 @@
+<div class="member-detail-container">
+  <ng-container *ngIf="vm$ | async as vm">
+    <div class="header">
+      <button mat-icon-button (click)="goBack(vm.tenantId)" aria-label="Go back">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>Member Details</h1>
+    </div>
+
+    <div *ngIf="vm.loading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <div *ngIf="vm.error" class="error-container">
+      <mat-card>
+        <mat-card-content>
+          <p class="error-message">{{ vm.error }}</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <mat-card *ngIf="!vm.loading && !vm.error && vm.member">
+      <mat-card-header>
+        <mat-card-title>{{ vm.member.firstName }} {{ vm.member.lastName }}</mat-card-title>
+        <mat-card-subtitle>
+          <mat-chip [color]="getStatusColor(vm.member.status)" selected>
+            {{ vm.member.status }}
+          </mat-chip>
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="points-summary">
+          <div class="points-card">
+            <span class="points-value">{{ vm.member.pointsBalance | number }}</span>
+            <span class="points-label">Current Balance</span>
+          </div>
+          <div class="points-card">
+            <span class="points-value">{{ vm.member.lifetimePoints | number }}</span>
+            <span class="points-label">Lifetime Points</span>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="detail-section">
+          <h3>Contact Information</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Email</label>
+              <span>{{ vm.member.email || 'Not provided' }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Phone</label>
+              <span>{{ vm.member.phone }}</span>
+            </div>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="detail-section">
+          <h3>Enrollment Information</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Enrollment Source</label>
+              <span>{{ vm.member.enrollmentSource }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Enrolled At</label>
+              <span>{{ vm.member.enrolledAt | date:'medium' }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Last Activity</label>
+              <span>{{ vm.member.lastActivityAt ? (vm.member.lastActivityAt | date:'medium') : 'No activity yet' }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions align="end">
+        <a mat-button [routerLink]="['/tenants', vm.tenantId, 'members', vm.member.memberId, 'edit']">
+          <mat-icon>edit</mat-icon>
+          Edit Member
+        </a>
+        <a mat-raised-button color="primary" [routerLink]="['/tenants', vm.tenantId, 'members', vm.member.memberId, 'points']">
+          <mat-icon>stars</mat-icon>
+          View Points History
+        </a>
+      </mat-card-actions>
+    </mat-card>
+  </ng-container>
+</div>

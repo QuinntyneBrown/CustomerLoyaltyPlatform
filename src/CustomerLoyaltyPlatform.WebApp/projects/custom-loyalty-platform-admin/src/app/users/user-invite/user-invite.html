@@ -1,0 +1,61 @@
+<div class="user-invite-container">
+  <ng-container *ngIf="vm$ | async as vm">
+    <div class="header">
+      <button mat-icon-button (click)="goBack()" aria-label="Go back">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>Invite User</h1>
+    </div>
+
+    <mat-card>
+      <mat-card-content>
+        <div *ngIf="vm.error" class="error-banner">
+          {{ vm.error }}
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Email Address</mat-label>
+              <input matInput type="email" formControlName="email">
+              <mat-error *ngIf="form.get('email')?.hasError('required')">
+                Email is required
+              </mat-error>
+              <mat-error *ngIf="form.get('email')?.hasError('email')">
+                Please enter a valid email
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Role</mat-label>
+              <mat-select formControlName="role">
+                <mat-option *ngFor="let role of roles" [value]="role">
+                  {{ role }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="role-descriptions">
+            <p><strong>Owner:</strong> Full access to all features and settings</p>
+            <p><strong>Admin:</strong> Manage users, businesses, and programs</p>
+            <p><strong>Manager:</strong> Manage members and transactions</p>
+            <p><strong>Member:</strong> View-only access to data</p>
+          </div>
+
+          <div class="form-actions">
+            <button mat-button type="button" (click)="goBack()">Cancel</button>
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="vm.submitting">
+              <mat-spinner *ngIf="vm.submitting" diameter="20"></mat-spinner>
+              <span *ngIf="!vm.submitting">Send Invitation</span>
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </ng-container>
+</div>

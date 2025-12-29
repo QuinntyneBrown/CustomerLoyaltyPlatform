@@ -1,0 +1,113 @@
+.member-points-container {
+  padding: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0;
+  }
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 48px;
+}
+
+.error-container {
+  .error-message {
+    color: #f44336;
+    margin: 0;
+  }
+}
+
+.balance-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.balance-card {
+  text-align: center;
+
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px;
+  }
+
+  .balance-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: rgba(0, 0, 0, 0.87);
+  }
+
+  .balance-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: rgba(0, 0, 0, 0.54);
+    margin-top: 8px;
+  }
+
+  &--current {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+    .balance-value,
+    .balance-label {
+      color: white;
+    }
+
+    .balance-label {
+      opacity: 0.9;
+    }
+  }
+
+  &--expiring {
+    background-color: #fff3e0;
+
+    .balance-value {
+      color: #e65100;
+    }
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.transactions-card {
+  mat-card-header {
+    margin-bottom: 16px;
+  }
+}
+
+.transactions-table {
+  width: 100%;
+
+  .positive {
+    color: #4caf50;
+    font-weight: 500;
+  }
+
+  .negative {
+    color: #f44336;
+    font-weight: 500;
+  }
+}
+
+.no-data {
+  text-align: center;
+  padding: 24px;
+  color: rgba(0, 0, 0, 0.54);
+}

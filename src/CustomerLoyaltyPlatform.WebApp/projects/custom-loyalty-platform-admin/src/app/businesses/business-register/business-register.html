@@ -1,0 +1,128 @@
+<div class="business-register-container">
+  <ng-container *ngIf="vm$ | async as vm">
+    <div class="header">
+      <button mat-icon-button (click)="goBack()" aria-label="Go back">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>Register Business</h1>
+    </div>
+
+    <mat-card>
+      <mat-card-content>
+        <div *ngIf="vm.error" class="error-banner">
+          {{ vm.error }}
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <h3>Business Information</h3>
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Business Name</mat-label>
+              <input matInput formControlName="businessName">
+              <mat-error *ngIf="form.get('businessName')?.hasError('required')">
+                Business name is required
+              </mat-error>
+              <mat-error *ngIf="form.get('businessName')?.hasError('maxlength')">
+                Maximum 200 characters
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Owner Name</mat-label>
+              <input matInput formControlName="ownerName">
+              <mat-error *ngIf="form.get('ownerName')?.hasError('required')">
+                Owner name is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Email</mat-label>
+              <input matInput type="email" formControlName="email">
+              <mat-error *ngIf="form.get('email')?.hasError('required')">
+                Email is required
+              </mat-error>
+              <mat-error *ngIf="form.get('email')?.hasError('email')">
+                Please enter a valid email
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Phone</mat-label>
+              <input matInput formControlName="phone">
+              <mat-error *ngIf="form.get('phone')?.hasError('required')">
+                Phone is required
+              </mat-error>
+              <mat-error *ngIf="form.get('phone')?.hasError('pattern')">
+                Please enter a valid phone number
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Business Type</mat-label>
+              <mat-select formControlName="businessType">
+                <mat-option *ngFor="let type of businessTypes" [value]="type">
+                  {{ type }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <h3>Address</h3>
+          <div class="form-grid">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Street</mat-label>
+              <input matInput formControlName="street">
+              <mat-error *ngIf="form.get('street')?.hasError('required')">
+                Street is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>City</mat-label>
+              <input matInput formControlName="city">
+              <mat-error *ngIf="form.get('city')?.hasError('required')">
+                City is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>State</mat-label>
+              <input matInput formControlName="state">
+              <mat-error *ngIf="form.get('state')?.hasError('required')">
+                State is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Postal Code</mat-label>
+              <input matInput formControlName="postalCode">
+              <mat-error *ngIf="form.get('postalCode')?.hasError('required')">
+                Postal code is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Country</mat-label>
+              <input matInput formControlName="country">
+              <mat-error *ngIf="form.get('country')?.hasError('required')">
+                Country is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-actions">
+            <button mat-button type="button" (click)="goBack()">Cancel</button>
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="vm.submitting">
+              <mat-spinner *ngIf="vm.submitting" diameter="20"></mat-spinner>
+              <span *ngIf="!vm.submitting">Register Business</span>
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </ng-container>
+</div>

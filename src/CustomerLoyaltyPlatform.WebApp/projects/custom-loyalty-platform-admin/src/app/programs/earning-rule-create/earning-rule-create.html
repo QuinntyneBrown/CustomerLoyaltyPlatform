@@ -1,0 +1,86 @@
+<div class="earning-rule-create-container">
+  <ng-container *ngIf="vm$ | async as vm">
+    <div class="header">
+      <button mat-icon-button (click)="goBack()" aria-label="Go back">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>Configure Earning Rule</h1>
+    </div>
+
+    <mat-card>
+      <mat-card-content>
+        <div *ngIf="vm.error" class="error-banner">
+          {{ vm.error }}
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Rule Type</mat-label>
+              <mat-select formControlName="ruleType">
+                <mat-option *ngFor="let type of ruleTypes" [value]="type">
+                  {{ type }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Points Amount</mat-label>
+              <input matInput type="number" formControlName="pointsAmount">
+              <mat-hint>Points earned per qualifying action</mat-hint>
+              <mat-error *ngIf="form.get('pointsAmount')?.hasError('required')">
+                Points amount is required
+              </mat-error>
+              <mat-error *ngIf="form.get('pointsAmount')?.hasError('min')">
+                Must be at least 1
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Spend Threshold (optional)</mat-label>
+              <input matInput type="number" formControlName="spendThreshold">
+              <span matTextPrefix>$&nbsp;</span>
+              <mat-hint>Minimum spend to qualify for points</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Applicable Categories (optional)</mat-label>
+              <input matInput formControlName="applicableCategories">
+              <mat-hint>Comma-separated list of categories</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Effective From</mat-label>
+              <input matInput [matDatepicker]="fromPicker" formControlName="effectiveFrom">
+              <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
+              <mat-datepicker #fromPicker></mat-datepicker>
+              <mat-error *ngIf="form.get('effectiveFrom')?.hasError('required')">
+                Start date is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Effective To (optional)</mat-label>
+              <input matInput [matDatepicker]="toPicker" formControlName="effectiveTo">
+              <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
+              <mat-datepicker #toPicker></mat-datepicker>
+              <mat-hint>Leave empty for no end date</mat-hint>
+            </mat-form-field>
+          </div>
+
+          <div class="form-actions">
+            <button mat-button type="button" (click)="goBack()">Cancel</button>
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="vm.submitting">
+              <mat-spinner *ngIf="vm.submitting" diameter="20"></mat-spinner>
+              <span *ngIf="!vm.submitting">Configure Rule</span>
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </ng-container>
+</div>

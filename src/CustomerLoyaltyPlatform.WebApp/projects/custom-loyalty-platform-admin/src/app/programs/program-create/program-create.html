@@ -1,0 +1,82 @@
+<div class="program-create-container">
+  <ng-container *ngIf="vm$ | async as vm">
+    <div class="header">
+      <button mat-icon-button (click)="goBack()" aria-label="Go back">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>Create Loyalty Program</h1>
+    </div>
+
+    <div *ngIf="vm.loading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <mat-card *ngIf="!vm.loading">
+      <mat-card-content>
+        <div *ngIf="vm.error" class="error-banner">
+          {{ vm.error }}
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Program Name</mat-label>
+              <input matInput formControlName="programName">
+              <mat-error *ngIf="form.get('programName')?.hasError('required')">
+                Program name is required
+              </mat-error>
+              <mat-error *ngIf="form.get('programName')?.hasError('maxlength')">
+                Maximum 200 characters
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Business</mat-label>
+              <mat-select formControlName="businessId">
+                <mat-option *ngFor="let business of vm.businesses" [value]="business.businessId">
+                  {{ business.businessName }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="form.get('businessId')?.hasError('required')">
+                Business is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Program Type</mat-label>
+              <mat-select formControlName="programType">
+                <mat-option *ngFor="let type of programTypes" [value]="type">
+                  {{ type }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Points Name</mat-label>
+              <input matInput formControlName="pointsName">
+              <mat-hint>What do you call your loyalty points? (e.g., Points, Stars, Coins)</mat-hint>
+              <mat-error *ngIf="form.get('pointsName')?.hasError('required')">
+                Points name is required
+              </mat-error>
+              <mat-error *ngIf="form.get('pointsName')?.hasError('maxlength')">
+                Maximum 50 characters
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-actions">
+            <button mat-button type="button" (click)="goBack()">Cancel</button>
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="vm.submitting">
+              <mat-spinner *ngIf="vm.submitting" diameter="20"></mat-spinner>
+              <span *ngIf="!vm.submitting">Create Program</span>
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </ng-container>
+</div>

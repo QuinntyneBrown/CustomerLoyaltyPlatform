@@ -1,0 +1,87 @@
+<div class="points-redeem-container">
+  <ng-container *ngIf="vm$ | async as vm">
+    <div class="header">
+      <button mat-icon-button (click)="goBack()" aria-label="Go back">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>Redeem Points</h1>
+    </div>
+
+    <div *ngIf="vm.loading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <mat-card *ngIf="!vm.loading">
+      <mat-card-content>
+        <div *ngIf="vm.error" class="error-banner">
+          {{ vm.error }}
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Member</mat-label>
+              <mat-select formControlName="memberId">
+                <mat-option *ngFor="let member of vm.members" [value]="member.memberId">
+                  {{ member.firstName }} {{ member.lastName }} ({{ member.pointsBalance }} points)
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="form.get('memberId')?.hasError('required')">
+                Member is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Program</mat-label>
+              <mat-select formControlName="programId">
+                <mat-option *ngFor="let program of vm.programs" [value]="program.programId">
+                  {{ program.programName }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="form.get('programId')?.hasError('required')">
+                Program is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Points to Redeem</mat-label>
+              <input matInput type="number" formControlName="pointsAmount">
+              <mat-error *ngIf="form.get('pointsAmount')?.hasError('required')">
+                Points amount is required
+              </mat-error>
+              <mat-error *ngIf="form.get('pointsAmount')?.hasError('min')">
+                Must be at least 1
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Description</mat-label>
+              <input matInput formControlName="description">
+              <mat-hint>e.g., "Redeemed for $10 discount"</mat-hint>
+              <mat-error *ngIf="form.get('description')?.hasError('required')">
+                Description is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Notes (optional)</mat-label>
+              <textarea matInput formControlName="notes" rows="2"></textarea>
+            </mat-form-field>
+          </div>
+
+          <div class="form-actions">
+            <button mat-button type="button" (click)="goBack()">Cancel</button>
+            <button
+              mat-raised-button
+              color="accent"
+              type="submit"
+              [disabled]="vm.submitting">
+              <mat-spinner *ngIf="vm.submitting" diameter="20"></mat-spinner>
+              <span *ngIf="!vm.submitting">Redeem Points</span>
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </ng-container>
+</div>

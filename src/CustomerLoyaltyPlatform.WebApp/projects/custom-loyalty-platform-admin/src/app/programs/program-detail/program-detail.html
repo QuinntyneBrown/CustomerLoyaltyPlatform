@@ -1,0 +1,109 @@
+<div class="program-detail-container">
+  <ng-container *ngIf="vm$ | async as vm">
+    <div class="header">
+      <button mat-icon-button (click)="goBack(vm.tenantId)" aria-label="Go back">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>Program Details</h1>
+    </div>
+
+    <div *ngIf="vm.loading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <div *ngIf="vm.error" class="error-container">
+      <mat-card>
+        <mat-card-content>
+          <p class="error-message">{{ vm.error }}</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <ng-container *ngIf="!vm.loading && !vm.error && vm.program">
+      <mat-card class="program-card">
+        <mat-card-header>
+          <mat-card-title>{{ vm.program.programName }}</mat-card-title>
+          <mat-card-subtitle>
+            <mat-chip [color]="getStatusColor(vm.program.isActive)" selected>
+              {{ vm.program.isActive ? 'Active' : 'Inactive' }}
+            </mat-chip>
+          </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Program Type</label>
+              <span>{{ vm.program.programType }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Points Name</label>
+              <span>{{ vm.program.pointsName }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Created At</label>
+              <span>{{ vm.program.createdAt | date:'medium' }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="earning-rules-card">
+        <mat-card-header>
+          <mat-card-title>Earning Rules</mat-card-title>
+          <a mat-raised-button color="primary" [routerLink]="['/tenants', vm.tenantId, 'programs', vm.program.programId, 'earning-rules', 'create']">
+            <mat-icon>add</mat-icon>
+            Add Rule
+          </a>
+        </mat-card-header>
+
+        <mat-card-content>
+          <table mat-table [dataSource]="vm.earningRules" class="earning-rules-table">
+            <ng-container matColumnDef="ruleType">
+              <th mat-header-cell *matHeaderCellDef>Rule Type</th>
+              <td mat-cell *matCellDef="let rule">{{ rule.ruleType }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="pointsAmount">
+              <th mat-header-cell *matHeaderCellDef>Points</th>
+              <td mat-cell *matCellDef="let rule">{{ rule.pointsAmount }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="spendThreshold">
+              <th mat-header-cell *matHeaderCellDef>Spend Threshold</th>
+              <td mat-cell *matCellDef="let rule">{{ rule.spendThreshold ? ('$' + rule.spendThreshold) : '-' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="effectiveFrom">
+              <th mat-header-cell *matHeaderCellDef>Effective From</th>
+              <td mat-cell *matCellDef="let rule">{{ rule.effectiveFrom | date:'shortDate' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="effectiveTo">
+              <th mat-header-cell *matHeaderCellDef>Effective To</th>
+              <td mat-cell *matCellDef="let rule">{{ rule.effectiveTo ? (rule.effectiveTo | date:'shortDate') : 'No end date' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="isActive">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let rule">
+                <mat-chip [color]="getStatusColor(rule.isActive)" selected>
+                  {{ rule.isActive ? 'Active' : 'Inactive' }}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+            <tr class="mat-row" *matNoDataRow>
+              <td class="mat-cell no-data" [attr.colspan]="displayedColumns.length">
+                No earning rules configured. Add a rule to define how members earn points.
+              </td>
+            </tr>
+          </table>
+        </mat-card-content>
+      </mat-card>
+    </ng-container>
+  </ng-container>
+</div>
