@@ -1,0 +1,88 @@
+<div class="tenant-detail-container">
+  <ng-container *ngIf="vm$ | async as vm">
+    <div class="header">
+      <button mat-icon-button (click)="goBack()" aria-label="Go back">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>Tenant Details</h1>
+    </div>
+
+    <div *ngIf="vm.loading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <div *ngIf="vm.error" class="error-container">
+      <mat-card>
+        <mat-card-content>
+          <p class="error-message">{{ vm.error }}</p>
+          <button mat-raised-button color="primary" (click)="goBack()">Back to List</button>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <mat-card *ngIf="!vm.loading && !vm.error && vm.tenant">
+      <mat-card-header>
+        <mat-card-title>{{ vm.tenant.tenantName }}</mat-card-title>
+        <mat-card-subtitle>{{ vm.tenant.tenantSlug }}</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <label>Status</label>
+            <mat-chip [color]="getStatusColor(vm.tenant.status)" selected>
+              {{ vm.tenant.status }}
+            </mat-chip>
+          </div>
+
+          <div class="detail-item">
+            <label>Plan Type</label>
+            <span>{{ vm.tenant.planType }}</span>
+          </div>
+
+          <div class="detail-item">
+            <label>Primary Contact</label>
+            <span>{{ vm.tenant.primaryContactName }}</span>
+          </div>
+
+          <div class="detail-item">
+            <label>Contact Email</label>
+            <span>{{ vm.tenant.primaryContactEmail }}</span>
+          </div>
+
+          <div class="detail-item">
+            <label>Data Region</label>
+            <span>{{ vm.tenant.dataRegion }}</span>
+          </div>
+
+          <div class="detail-item">
+            <label>Isolation Level</label>
+            <span>{{ vm.tenant.isolationLevel }}</span>
+          </div>
+
+          <div class="detail-item">
+            <label>Provisioned At</label>
+            <span>{{ vm.tenant.provisionedAt | date:'medium' }}</span>
+          </div>
+
+          <div class="detail-item" *ngIf="vm.tenant.activatedAt">
+            <label>Activated At</label>
+            <span>{{ vm.tenant.activatedAt | date:'medium' }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button
+          mat-raised-button
+          color="primary"
+          *ngIf="vm.tenant.status === 'Provisioned'"
+          (click)="activate(vm.tenant.tenantId)"
+          [disabled]="vm.activating">
+          <mat-spinner *ngIf="vm.activating" diameter="20"></mat-spinner>
+          <span *ngIf="!vm.activating">Activate Tenant</span>
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </ng-container>
+</div>
